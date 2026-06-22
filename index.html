@@ -103,11 +103,6 @@
     border-radius: 16px;
     padding: 20px;
   }
-  .mindmap-node {
-    cursor: grab;
-    user-select: none;
-  }
-  .mindmap-node:active { cursor: grabbing; }
   .fade-in { animation: fadeIn .5s ease-out; }
   @keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to {opacity:1; transform:none;} }
   .pulse-dot {
@@ -149,16 +144,20 @@
     position: absolute;
     background: #1a1f33;
     border: 1px solid var(--border);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
     pointer-events: none;
     opacity: 0;
     transition: opacity .2s;
-    max-width: 220px;
+    max-width: 320px;
     z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
   .tooltip.show { opacity: 1; }
+  .tooltip-title { font-weight: 600; margin-bottom: 6px; color: #22d3ee; }
+  .tooltip-content { color: #e6e8ef; line-height: 1.5; }
+  .tooltip-stats { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #9aa0b4; }
   .section-title {
     font-size: 13px;
     text-transform: uppercase;
@@ -353,10 +352,11 @@
         <div class="flex gap-2">
           <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="resetMindmap()">↻ Resetar</button>
           <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="toggleMindmapLabels()">🏷️ Rótulos</button>
+          <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="toggleMindmapDetails()">📊 Detalhes</button>
         </div>
       </div>
-      <div class="text-xs text-slate-400 mb-3">💡 Arraste os nós • Clique para expandir/recolher • Scroll para zoom</div>
-      <div class="relative rounded-2xl overflow-hidden" style="background: radial-gradient(circle at center, rgba(124,92,255,0.08), transparent 70%); height: 600px; border: 1px solid var(--border);">
+      <div class="text-xs text-slate-400 mb-3">💡 Arraste os nós • Clique para expandir/recolher • Scroll para zoom • Passe o mouse para detalhes</div>
+      <div class="relative rounded-2xl overflow-hidden" style="background: radial-gradient(circle at center, rgba(124,92,255,0.08), transparent 70%); height: 650px; border: 1px solid var(--border);">
         <canvas id="mindmapCanvas" style="width:100%; height:100%; display:block;"></canvas>
         <div id="mindmapTooltip" class="tooltip"></div>
       </div>
@@ -430,14 +430,14 @@ let currentDoc = null;
 let charts = {};
 let mindmapData = null;
 let mindmapShowLabels = true;
+let mindmapShowDetails = true;
 
 // ====== Helper: converte cor hex (#rrggbb) para rgba com alpha ======
 function hexToRgba(hex, alpha) {
-  // Remove qualquer alpha já existente (suporta #rgb, #rrggbb, #rrggbbaa)
   let h = hex.replace('#', '');
   if (h.length === 3) h = h.split('').map(c => c + c).join('');
-  if (h.length === 8) h = h.slice(0, 6); // descarta alpha pré-existente
-  if (h.length !== 6) return `rgba(124,92,255,${alpha})`; // fallback
+  if (h.length === 8) h = h.slice(0, 6);
+  if (h.length !== 6) return `rgba(124,92,255,${alpha})`;
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
@@ -579,7 +579,7 @@ function analyzeText(text, numPages) {
 
   renderSummary(summary, mainIdea);
   renderCharts(topWords, paraStats, topics);
-  renderMindmap(topWords, topics);
+  renderMindmap(topWords, topics, paragraphs);
   renderKeywords(topWords, concepts);
   renderStructure(structure);
 
@@ -590,18 +590,33 @@ function analyzeText(text, numPages) {
 
 function detectTopics(paragraphs, keywords) {
   const topics = [];
+  const kwSet = new Set(keywords.slice(0, 10));
+  
+  // Analisar cada parágrafo para extrair tópicos mais ricos
   paragraphs.forEach((p, i) => {
     const lower = p.toLowerCase();
+    const sentences = p.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    
+    // Encontrar palavras-chave presentes
     const matches = keywords.filter(k => lower.includes(k));
-    if (matches.length > 0 || i < 3) {
+    
+    // Extrair frase principal (primeira frase ou a mais longa)
+    const mainSentence = sentences.reduce((a, b) => a.length > b.length ? a : b, sentences[0] || '');
+    
+    if (matches.length > 0 || i < 5) {
       topics.push({
-        name: p.split(/[.!?]/)[0].trim().slice(0, 60) || `Tópico ${i+1}`,
+        name: mainSentence.trim().slice(0, 80) || `Tópico ${i+1}`,
+        fullText: mainSentence.trim(),
         weight: matches.length + 1,
-        keywords: matches.slice(0, 3)
+        keywords: matches.slice(0, 5),
+        sentences: sentences.length,
+        paragraphIdx: i,
+        relevance: Math.min(100, (matches.length * 15) + (sentences.length * 5))
       });
     }
   });
-  return topics.slice(0, 8);
+  
+  return topics.slice(0, 10);
 }
 
 function extractSummary(sentences, keywords) {
@@ -805,7 +820,7 @@ function renderCharts(topWords, paraStats, topics) {
   });
 }
 
-function renderMindmap(topWords, topics) {
+function renderMindmap(topWords, topics, paragraphs) {
   const canvas = $('mindmapCanvas');
   const container = canvas.parentElement;
   const dpr = window.devicePixelRatio || 1;
@@ -819,53 +834,77 @@ function renderMindmap(topWords, topics) {
   const W = container.clientWidth;
   const H = container.clientHeight;
 
+  // Construir hierarquia mais rica
   const nodes = [];
   const centerNode = {
-    id: 'root', label: 'Documento', x: W/2, y: H/2, r: 50,
-    color: '#7c5cff', parent: null, expanded: true,
-    tooltip: 'Tema central do documento'
+    id: 'root', 
+    label: 'Documento', 
+    x: W/2, 
+    y: H/2, 
+    r: 55,
+    color: '#7c5cff', 
+    parent: null, 
+    expanded: true,
+    level: 0,
+    tooltip: {
+      title: 'Tema Central',
+      content: 'Conceito principal do documento',
+      stats: `${topics.length} tópicos • ${topWords.length} palavras-chave`
+    }
   };
   nodes.push(centerNode);
 
-  const topicColors = ['#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc'];
-  topics.slice(0, 6).forEach((t, i) => {
-    const angle = (i / Math.min(6, topics.length)) * Math.PI * 2 - Math.PI/2;
-    const dist = 180;
-    const node = {
+  const topicColors = ['#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc','#fb7185','#a3e635'];
+  
+  // Criar tópicos principais (nível 1)
+  topics.slice(0, 8).forEach((t, i) => {
+    const angle = (i / Math.min(8, topics.length)) * Math.PI * 2 - Math.PI/2;
+    const dist = 200;
+    const topicNode = {
       id: 'topic-' + i,
-      label: t.name.slice(0, 30),
+      label: t.name.slice(0, 35),
       x: W/2 + Math.cos(angle) * dist,
       y: H/2 + Math.sin(angle) * dist,
-      r: 35 + t.weight * 3,
-      // COR BASE (sem alpha) — o alpha é aplicado apenas no draw
+      r: 40 + t.weight * 4,
       color: topicColors[i % topicColors.length],
       parent: centerNode,
       expanded: true,
-      tooltip: t.keywords.length > 0 ? t.keywords.join(', ') : t.name
+      level: 1,
+      tooltip: {
+        title: t.name.slice(0, 50),
+        content: t.fullText.slice(0, 150) + (t.fullText.length > 150 ? '...' : ''),
+        stats: `${t.keywords.length} palavras-chave • ${t.sentences} frases • Relevância: ${t.relevance}%`
+      }
     };
-    nodes.push(node);
+    nodes.push(topicNode);
 
+    // Sub-tópicos (nível 2) - palavras-chave
     if (t.keywords.length > 0) {
-      t.keywords.slice(0, 3).forEach((kw, j) => {
-        const subAngle = angle + (j - 1) * 0.4;
-        const subDist = dist + 110;
-        nodes.push({
+      t.keywords.slice(0, 4).forEach((kw, j) => {
+        const subAngle = angle + (j - (t.keywords.length - 1) / 2) * 0.35;
+        const subDist = dist + 130;
+        const subNode = {
           id: 'kw-' + i + '-' + j,
-          label: kw.slice(0, 20),
+          label: kw.slice(0, 25),
           x: W/2 + Math.cos(subAngle) * subDist,
           y: H/2 + Math.sin(subAngle) * subDist,
-          r: 22,
-          // COR BASE (sem alpha) — o alpha é aplicado apenas no draw
+          r: 28,
           color: topicColors[i % topicColors.length],
-          parent: node,
+          parent: topicNode,
           expanded: false,
-          tooltip: 'Palavra-chave'
-        });
+          level: 2,
+          tooltip: {
+            title: kw.charAt(0).toUpperCase() + kw.slice(1),
+            content: `Palavra-chave do tópico: ${t.name.slice(0, 40)}`,
+            stats: `Nível 2 • Conectado a: ${t.name.slice(0, 30)}`
+          }
+        };
+        nodes.push(subNode);
       });
     }
   });
 
-  mindmapData = { nodes, ctx, W, H, canvas, drag: null, offsetX: 0, offsetY: 0, zoom: 1, panX: 0, panY: 0 };
+  mindmapData = { nodes, ctx, W, H, canvas, drag: null, zoom: 1, panX: 0, panY: 0 };
 
   drawMindmap();
   setupMindmapEvents();
@@ -875,58 +914,107 @@ function drawMindmap() {
   const { nodes, ctx, W, H, zoom, panX, panY } = mindmapData;
   ctx.clearRect(0, 0, W, H);
 
-  // Conexões
+  // Desenhar conexões com curvas
   nodes.forEach(n => {
     if (n.parent) {
       const px = n.parent.x * zoom + panX;
       const py = n.parent.y * zoom + panY;
       const nx = n.x * zoom + panX;
       const ny = n.y * zoom + panY;
+      
       ctx.beginPath();
       ctx.moveTo(px, py);
-      ctx.lineTo(nx, ny);
-      ctx.strokeStyle = hexToRgba(n.color, 0.4);
-      ctx.lineWidth = 2;
+      
+      // Curva suave
+      const midX = (px + nx) / 2;
+      const midY = (py + ny) / 2;
+      ctx.quadraticCurveTo(midX, midY, nx, ny);
+      
+      ctx.strokeStyle = hexToRgba(n.color, 0.5);
+      ctx.lineWidth = Math.max(1, (3 - n.level) * zoom);
       ctx.stroke();
     }
   });
 
-  // Nós
+  // Desenhar nós
   nodes.forEach(n => {
     const x = n.x * zoom + panX;
     const y = n.y * zoom + panY;
     const r = n.r * zoom;
 
-    // Glow
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 1.5);
-    grad.addColorStop(0, hexToRgba(n.color, 0.27));
+    // Glow effect
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 1.8);
+    grad.addColorStop(0, hexToRgba(n.color, 0.3));
     grad.addColorStop(1, hexToRgba(n.color, 0));
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(x, y, r * 1.5, 0, Math.PI * 2);
+    ctx.arc(x, y, r * 1.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Círculo
+    // Círculo principal
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = hexToRgba(n.color, 0.8);
+    ctx.fillStyle = hexToRgba(n.color, 0.85);
     ctx.fill();
     ctx.strokeStyle = n.color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3 * zoom;
     ctx.stroke();
+
+    // Ícone de nível
+    if (n.level === 0) {
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${20 * zoom}px Inter`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📄', x, y);
+    } else if (n.level === 1 && r > 30) {
+      ctx.fillStyle = 'white';
+      ctx.font = `${14 * zoom}px Inter`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📌', x, y - 10 * zoom);
+    }
 
     // Rótulo
     if (mindmapShowLabels && r > 15) {
       ctx.fillStyle = 'white';
-      ctx.font = `${Math.max(10, 12 * zoom)}px Inter, sans-serif`;
+      ctx.font = `${Math.max(10, (13 - n.level * 2) * zoom)}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      
       const words = n.label.split(' ');
-      if (words.length > 1 && r < 40) {
-        ctx.fillText(words.slice(0, Math.ceil(words.length/2)).join(' '), x, y - 6 * zoom);
-        ctx.fillText(words.slice(Math.ceil(words.length/2)).join(' '), x, y + 8 * zoom);
+      const lineHeight = 14 * zoom;
+      const maxLines = n.level === 0 ? 1 : n.level === 1 ? 3 : 2;
+      
+      if (words.length > 1 && r < 45) {
+        const lines = [];
+        let currentLine = '';
+        words.forEach(word => {
+          if ((currentLine + ' ' + word).length < 20) {
+            currentLine += (currentLine ? ' ' : '') + word;
+          } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+        if (currentLine) lines.push(currentLine);
+        
+        lines.slice(0, maxLines).forEach((line, idx) => {
+          const yOffset = (idx - (lines.length - 1) / 2) * lineHeight;
+          ctx.fillText(line.slice(0, 25), x, y + yOffset);
+        });
       } else {
-        ctx.fillText(n.label.slice(0, 20), x, y);
+        ctx.fillText(n.label.slice(0, 25), x, y);
+      }
+      
+      // Badge de detalhes
+      if (mindmapShowDetails && n.level > 0 && r > 25) {
+        const badgeY = y + r + 8 * zoom;
+        ctx.fillStyle = hexToRgba(n.color, 0.3);
+        ctx.fillRect(x - 20 * zoom, badgeY - 6 * zoom, 40 * zoom, 12 * zoom);
+        ctx.fillStyle = 'white';
+        ctx.font = `${9 * zoom}px Inter`;
+        ctx.fillText(`N${n.level}`, x, badgeY);
       }
     }
   });
@@ -987,15 +1075,19 @@ function setupMindmapEvents() {
       drawMindmap();
     } else {
       const node = findNode(pos.x, pos.y);
-      if (node) {
-        tooltip.textContent = node.tooltip;
+      if (node && node.tooltip) {
+        tooltip.innerHTML = `
+          <div class="tooltip-title">${node.tooltip.title}</div>
+          <div class="tooltip-content">${node.tooltip.content}</div>
+          <div class="tooltip-stats">${node.tooltip.stats}</div>
+        `;
         tooltip.style.left = (pos.x + 15) + 'px';
         tooltip.style.top = (pos.y + 15) + 'px';
         tooltip.classList.add('show');
-        canvas.style.cursor = 'grab';
+        canvas.style.cursor = 'pointer';
       } else {
         tooltip.classList.remove('show');
-        canvas.style.cursor = 'default';
+        canvas.style.cursor = isDragging ? 'grabbing' : 'default';
       }
     }
   });
@@ -1016,9 +1108,13 @@ function setupMindmapEvents() {
     const node = findNode(pos.x, pos.y);
     if (node && node.parent) {
       node.expanded = !node.expanded;
+      // Animar filhos
       mindmapData.nodes.forEach(n => {
         if (n.parent === node) {
-          n.x = node.expanded ? node.x + (n.x - node.x) * 0.01 : node.x;
+          if (!node.expanded) {
+            n.x = node.x;
+            n.y = node.y;
+          }
         }
       });
       drawMindmap();
@@ -1067,12 +1163,17 @@ function resetMindmap() {
     const topWords = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,15);
     const paragraphs = currentText.split(/\n\s*\n/).filter(p => p.trim().length > 10);
     const topics = detectTopics(paragraphs, topWords.map(w=>w[0]));
-    renderMindmap(topWords, topics);
+    renderMindmap(topWords, topics, paragraphs);
   }
 }
 
 function toggleMindmapLabels() {
   mindmapShowLabels = !mindmapShowLabels;
+  drawMindmap();
+}
+
+function toggleMindmapDetails() {
+  mindmapShowDetails = !mindmapShowDetails;
   drawMindmap();
 }
 
