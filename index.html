@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PDF Insight Pro</title>
+<title>PDF Insight Pro - IA Real Gratuita</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -11,142 +11,72 @@
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; }
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #0b0d17;
-  color: #e6e8ef;
-  margin: 0;
-  padding: 0;
-}
-.bg-grid {
-  position: fixed; inset:0; z-index:-2;
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(124,92,255,0.25), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(34,211,238,0.18), transparent 45%);
-}
-.glass {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(14px);
-}
-.gradient-text {
-  background: linear-gradient(90deg, #7c5cff, #22d3ee);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.btn-primary {
-  background: linear-gradient(90deg, #7c5cff, #22d3ee);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: transform .2s;
-}
-.btn-primary:hover { transform: translateY(-2px); }
-.btn-ghost {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #e6e8ef;
-  cursor: pointer;
-}
+body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: #e6e8ef; margin: 0; }
+.bg-grid { position: fixed; inset:0; z-index:-2; background-image: radial-gradient(circle at 20% 10%, rgba(124,92,255,0.25), transparent 40%), radial-gradient(circle at 80% 90%, rgba(34,211,238,0.18), transparent 45%); }
+.glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(14px); }
+.gradient-text { background: linear-gradient(90deg, #7c5cff, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn-primary { background: linear-gradient(90deg, #7c5cff, #22d3ee); color: white; border: none; cursor: pointer; padding: 12px 24px; border-radius: 12px; font-weight: 600; transition: all .2s; font-size: 14px; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,92,255,0.4); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e6e8ef; cursor: pointer; padding: 12px 24px; border-radius: 12px; transition: all .2s; font-size: 14px; }
 .btn-ghost:hover { background: rgba(255,255,255,0.08); }
-.drop-zone {
-  border: 2px dashed rgba(124,92,255,0.4);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all .3s;
-}
-.drop-zone:hover {
-  border-color: #22d3ee;
-  background: rgba(34,211,238,0.08);
-}
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(5, 7, 15, 0.75);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
+.btn-big { padding: 16px 28px; font-size: 16px; border-radius: 16px; }
+.drop-zone { border: 2px dashed rgba(124,92,255,0.4); border-radius: 20px; cursor: pointer; transition: all .3s; background: rgba(124,92,255,0.04); }
+.drop-zone:hover, .drop-zone.drag { border-color: #22d3ee; background: rgba(34,211,238,0.08); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(5, 7, 15, 0.8); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
 .modal-overlay.show { display: flex; }
-.modal {
-  background: #121628;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 32px;
-  width: 90%;
-  max-width: 560px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-.input-field {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  color: #e6e8ef;
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-}
-.input-field:focus {
-  border-color: #7c5cff;
-}
-.textarea-field {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  color: #e6e8ef;
-  font-family: inherit;
-  font-size: 14px;
-  outline: none;
-  resize: vertical;
-  min-height: 200px;
-}
-.toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #121628;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 14px 20px;
-  z-index: 2000;
-  display: none;
-}
+.modal { background: #121628; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 32px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; }
+.input-field, .textarea-field { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #e6e8ef; font-family: inherit; font-size: 14px; outline: none; }
+.input-field:focus, .textarea-field:focus { border-color: #7c5cff; }
+.textarea-field { resize: vertical; min-height: 200px; line-height: 1.6; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #121628; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 20px; z-index: 2000; display: none; align-items: center; gap: 10px; max-width: 360px; }
 .toast.show { display: flex; }
 .toast.success { border-left: 3px solid #34d399; }
 .toast.error { border-left: 3px solid #f87171; }
 .toast.info { border-left: 3px solid #22d3ee; }
-.loader {
-  width: 40px; height: 40px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-top-color: #7c5cff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+.toast.warn { border-left: 3px solid #fbbf24; }
+.loader { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #7c5cff; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.tab-btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 500;
-  font-size: 13px;
-  color: #9aa0b4;
-  cursor: pointer;
-  border: 1px solid transparent;
-  background: transparent;
-}
-.tab-btn:hover { color: #e6e8ef; }
-.tab-btn.active {
-  color: white;
-  background: rgba(124,92,255,0.15);
-  border-color: rgba(124,92,255,0.4);
-}
+.tab-btn { padding: 12px 18px; border-radius: 12px; font-weight: 600; font-size: 14px; color: #9aa0b4; cursor: pointer; border: 1px solid transparent; background: transparent; white-space: nowrap; transition: all .2s; }
+.tab-btn:hover { color: #e6e8ef; background: rgba(255,255,255,0.04); }
+.tab-btn.active { color: white; background: rgba(124,92,255,0.2); border-color: rgba(124,92,255,0.5); }
+.ai-badge { display: inline-block; margin-left: 4px; padding: 2px 6px; font-size: 9px; background: linear-gradient(90deg, #7c5cff, #22d3ee); border-radius: 4px; font-weight: 700; vertical-align: middle; }
 .hidden { display: none !important; }
+.summary-bullet { padding: 14px 18px; border-left: 3px solid #7c5cff; background: rgba(124,92,255,0.06); border-radius: 8px; margin-bottom: 10px; }
+.profile-chip { padding: 8px 14px; border-radius: 999px; font-size: 13px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all .2s; font-weight: 500; }
+.profile-chip:hover { background: rgba(255,255,255,0.08); }
+.profile-chip.active { background: linear-gradient(90deg, rgba(124,92,255,0.25), rgba(34,211,238,0.2)); border-color: rgba(124,92,255,0.5); }
+.level-option { padding: 14px 10px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all .2s; text-align: center; }
+.level-option.selected { background: rgba(124,92,255,0.2); border-color: rgba(124,92,255,0.5); }
+.mode-card { padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; cursor: pointer; transition: all .2s; text-align: center; }
+.mode-card:hover { background: rgba(124,92,255,0.08); transform: translateY(-3px); }
+.mode-card.selected { background: rgba(124,92,255,0.2); border-color: rgba(124,92,255,0.5); }
+.flashcard-container { perspective: 1500px; width: 100%; max-width: 500px; height: 320px; margin: 0 auto; }
+.flashcard { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; padding: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
+.flashcard-front { background: linear-gradient(135deg, rgba(124,92,255,0.2), rgba(34,211,238,0.1)); }
+.flashcard-back { background: linear-gradient(135deg, rgba(34,211,238,0.2), rgba(244,114,182,0.1)); transform: rotateY(180deg); }
+.quiz-option { padding: 14px 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all .2s; font-size: 14px; }
+.quiz-option:hover:not(.disabled) { background: rgba(124,92,255,0.1); border-color: rgba(124,92,255,0.3); }
+.quiz-option.correct { background: rgba(52, 211, 153, 0.2); border-color: #34d399; }
+.quiz-option.wrong { background: rgba(248, 113, 113, 0.2); border-color: #f87171; }
+.quiz-option.disabled { cursor: default; opacity: 0.7; }
+.chat-msg { padding: 12px 16px; border-radius: 12px; margin-bottom: 10px; line-height: 1.5; }
+.chat-msg.user { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); margin-left: 20%; }
+.chat-msg.ai { background: rgba(124,92,255,0.1); border: 1px solid rgba(124,92,255,0.2); margin-right: 20%; }
+.typing { display: inline-flex; gap: 4px; }
+.typing span { width: 8px; height: 8px; border-radius: 50%; background: #7c5cff; animation: typing 1.4s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-8px); opacity: 1; } }
+.tooltip { position: absolute; background: #1a1f33; border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 8px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 100; max-width: 280px; }
+.tooltip.show { opacity: 1; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.online { background: #34d399; box-shadow: 0 0 8px #34d399; }
+.status-dot.offline { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+.resource-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: all .3s; cursor: pointer; }
+.resource-card:hover { background: rgba(124,92,255,0.08); border-color: rgba(124,92,255,0.3); transform: translateY(-3px); }
 </style>
 </head>
 <body>
@@ -154,17 +84,27 @@ body {
 
 <!-- HEADER -->
 <header class="sticky top-0 z-40 glass border-b border-white/5">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg,#7c5cff,#22d3ee);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg,#7c5cff,#22d3ee);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
       <div>
         <div class="font-bold text-lg">PDF Insight <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 text-white">PRO</span></div>
-        <div class="text-xs text-slate-400" id="aiStatus">⏳ Verificando IA...</div>
+        <div class="text-xs flex items-center">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="aiStatus">Verificando...</span>
+        </div>
       </div>
     </div>
-    <button class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="openLogin()">Entrar</button>
+    <div class="hidden md:flex items-center gap-2" id="profileChips">
+      <div class="profile-chip active" data-profile="estudante" onclick="setProfile('estudante')">🎓 Estudante</div>
+      <div class="profile-chip" data-profile="pesquisador" onclick="setProfile('pesquisador')">🔬 Pesquisador</div>
+      <div class="profile-chip" data-profile="executivo" onclick="setProfile('executivo')">💼 Executivo</div>
+    </div>
+    <div id="authArea">
+      <button class="btn-ghost" onclick="openLogin()">👤 Entrar</button>
+    </div>
   </div>
 </header>
 
@@ -172,45 +112,78 @@ body {
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <div class="flex justify-between items-start mb-5">
-      <div class="text-2xl font-bold">Entrar 👋</div>
-      <button onclick="closeLogin()" class="text-2xl text-slate-400 hover:text-white">×</button>
-    </div>
-    <form onsubmit="doLogin(event)">
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs text-slate-400 mb-1.5 block">E-mail</label>
-          <input type="email" id="loginEmail" class="input-field" placeholder="voce@exemplo.com" required>
-        </div>
-        <div>
-          <label class="text-xs text-slate-400 mb-1.5 block">Senha</label>
-          <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-medium">Entrar</button>
+      <div>
+        <div class="text-2xl font-bold">Entrar 👋</div>
+        <div class="text-sm text-slate-400">Use qualquer e-mail e senha</div>
       </div>
-    </form>
-    <div class="text-center mt-4 text-sm text-slate-400">
-      Não tem conta? <a href="#" onclick="doRegister(event)" class="text-purple-400 hover:text-purple-300">Criar conta</a>
+      <button onclick="closeLogin()" class="text-2xl text-slate-400 hover:text-white w-8 h-8">×</button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 block">Nome</label>
+        <input type="text" id="loginName" class="input-field" placeholder="Seu nome">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 block">E-mail</label>
+        <input type="email" id="loginEmail" class="input-field" placeholder="voce@exemplo.com">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 block">Senha (mín. 4)</label>
+        <input type="password" id="loginPassword" class="input-field" placeholder="••••••••">
+      </div>
+      <button class="btn-primary w-full py-3" onclick="doLogin()">🚀 Entrar / Criar conta</button>
+      <div id="savedAccounts" class="hidden mt-4">
+        <div class="text-xs text-slate-400 mb-2">Contas salvas:</div>
+        <div id="accountsList" class="space-y-2"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- TEXT MODAL -->
 <div class="modal-overlay" id="textModal">
-  <div class="modal" style="max-width: 640px;">
+  <div class="modal" style="max-width: 700px;">
     <div class="flex justify-between items-start mb-5">
-      <div class="text-2xl font-bold">📝 Colar texto</div>
-      <button onclick="closeTextModal()" class="text-2xl text-slate-400 hover:text-white">×</button>
+      <div>
+        <div class="text-2xl font-bold">📝 Colar texto</div>
+        <div class="text-sm text-slate-400">Cole qualquer texto para análise completa</div>
+      </div>
+      <button onclick="closeTextModal()" class="text-2xl text-slate-400 hover:text-white w-8 h-8">×</button>
     </div>
     <div class="space-y-3">
       <div>
-        <label class="text-xs text-slate-400 mb-1.5 block">Título</label>
+        <label class="text-xs text-slate-400 mb-1.5 block">Título (opcional)</label>
         <input type="text" id="textTitle" class="input-field" placeholder="Ex: Meu documento">
       </div>
       <div>
-        <label class="text-xs text-slate-400 mb-1.5 block">Texto</label>
-        <textarea id="textInput" class="textarea-field" placeholder="Cole seu texto aqui..."></textarea>
+        <label class="text-xs text-slate-400 mb-1.5 block flex justify-between">
+          <span>Texto</span>
+          <span id="textCounter" class="text-slate-500">0 caracteres</span>
+        </label>
+        <textarea id="textInput" class="textarea-field" placeholder="Cole seu texto aqui..." oninput="updateTextCounter()"></textarea>
       </div>
-      <button onclick="processText()" class="btn-primary w-full py-3 rounded-xl font-medium">✨ Analisar</button>
+      <div>
+        <label class="text-xs text-slate-400 mb-2 block">Nível do resumo</label>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="level-option" data-level="short" onclick="selectLevel('short')">
+            <div class="text-2xl">⚡</div>
+            <div class="text-sm font-semibold">Curto</div>
+            <div class="text-xs text-slate-400">3 pontos</div>
+          </div>
+          <div class="level-option selected" data-level="medium" onclick="selectLevel('medium')">
+            <div class="text-2xl">📋</div>
+            <div class="text-sm font-semibold">Médio</div>
+            <div class="text-xs text-slate-400">6 pontos</div>
+          </div>
+          <div class="level-option" data-level="detailed" onclick="selectLevel('detailed')">
+            <div class="text-2xl">📖</div>
+            <div class="text-sm font-semibold">Detalhado</div>
+            <div class="text-xs text-slate-400">10 pontos</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary w-full py-3" onclick="processText()">✨ Analisar com IA</button>
+      <button class="text-xs text-slate-400 hover:text-white w-full py-2" onclick="loadTextExample()">💡 Carregar exemplo</button>
     </div>
   </div>
 </div>
@@ -218,40 +191,45 @@ body {
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toastIcon">✓</span>
-  <span id="toastMsg" class="text-sm ml-2"></span>
+  <span id="toastMsg" class="text-sm"></span>
 </div>
 
 <!-- HERO -->
-<section class="max-w-7xl mx-auto px-6 pt-16 pb-10">
+<section id="heroSection" class="max-w-7xl mx-auto px-6 pt-12 pb-8">
   <div class="grid md:grid-cols-2 gap-10 items-center">
     <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs mb-5">
+        <span class="status-dot online"></span>
+        <span>IA Real via Puter.js • 100% Grátis</span>
+      </div>
       <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-        IA <span class="gradient-text">real e gratuita</span> para<br>entender documentos
+        Transforme PDFs em<br><span class="gradient-text">conhecimento visual</span>
       </h1>
-      <p class="text-slate-400 text-lg mb-8">
-        Chat, flashcards, quiz e resumos com IA de verdade. 100% grátis.
+      <p class="text-slate-400 text-lg mb-6">
+        Mapas mentais, quizzes, flashcards, resumos e chat com IA. Tudo gratuito e privado.
       </p>
       <div class="flex flex-wrap gap-3">
-        <button class="btn-primary px-6 py-3 rounded-xl font-medium" onclick="document.getElementById('fileInput').click()">📄 Enviar PDF</button>
-        <button class="btn-ghost px-6 py-3 rounded-xl font-medium" onclick="openTextModal()">📝 Colar texto</button>
-        <button class="btn-ghost px-6 py-3 rounded-xl font-medium" onclick="loadDemo()">▶️ Demo</button>
+        <button class="btn-primary btn-big" onclick="document.getElementById('fileInput').click()">📄 Enviar PDF</button>
+        <button class="btn-ghost btn-big" onclick="openTextModal()">📝 Colar texto</button>
+        <button class="btn-ghost btn-big" onclick="loadDemo()">▶️ Demo</button>
       </div>
       <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="handleFile(event)">
     </div>
     <div class="glass rounded-3xl p-6">
-      <div id="dropZone" class="drop-zone p-10 text-center" onclick="document.getElementById('fileInput').click()">
+      <div id="dropZone" class="drop-zone p-10 text-center" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault(); this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
         <div class="text-6xl mb-4">📑</div>
         <div class="text-lg font-semibold mb-2">Arraste seu PDF aqui</div>
         <div class="text-sm text-slate-400">ou clique para selecionar</div>
+        <div class="text-xs text-slate-500 mt-2">Máximo 20MB</div>
       </div>
       <div id="fileInfo" class="hidden mt-4 p-4 rounded-xl bg-white/5">
         <div class="flex items-center gap-3">
           <div class="text-3xl">📄</div>
-          <div class="flex-1">
+          <div class="flex-1 min-w-0">
             <div id="fileName" class="font-medium text-sm truncate"></div>
             <div id="fileSize" class="text-xs text-slate-400"></div>
           </div>
-          <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="resetFile()">Remover</button>
+          <button class="btn-ghost text-xs px-3 py-1" onclick="resetFile()">✕</button>
         </div>
       </div>
     </div>
@@ -262,134 +240,459 @@ body {
 <div id="processing" class="hidden max-w-7xl mx-auto px-6 py-10">
   <div class="glass rounded-3xl p-10 text-center">
     <div class="loader mx-auto mb-4"></div>
-    <div class="text-lg font-semibold mb-2">Analisando...</div>
+    <div class="text-lg font-semibold mb-2">Analisando com IA...</div>
     <div id="processingStatus" class="text-sm text-slate-400">Extraindo texto</div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
     <div>
-      <h2 class="text-2xl font-bold">Análise com IA</h2>
+      <h2 class="text-2xl font-bold">📊 Análise Completa</h2>
       <p id="docTitle" class="text-sm text-slate-400 mt-1"></p>
     </div>
     <div class="flex gap-2">
-      <button class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="exportReport()">📥 Exportar</button>
-      <button class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="resetFile()">🔄 Novo</button>
+      <button class="btn-ghost text-sm" onclick="exportReport()">📥 Exportar</button>
+      <button class="btn-ghost text-sm" onclick="resetFile()">🔄 Novo</button>
     </div>
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div class="glass rounded-2xl p-4">
-      <div class="text-xs text-slate-400">Páginas</div>
+      <div class="text-xs text-slate-400">📄 Páginas</div>
       <div id="statPages" class="text-2xl font-bold gradient-text">0</div>
     </div>
     <div class="glass rounded-2xl p-4">
-      <div class="text-xs text-slate-400">Palavras</div>
+      <div class="text-xs text-slate-400">📝 Palavras</div>
       <div id="statWords" class="text-2xl font-bold gradient-text">0</div>
     </div>
     <div class="glass rounded-2xl p-4">
-      <div class="text-xs text-slate-400">Parágrafos</div>
+      <div class="text-xs text-slate-400">¶ Parágrafos</div>
       <div id="statParagraphs" class="text-2xl font-bold gradient-text">0</div>
     </div>
     <div class="glass rounded-2xl p-4">
-      <div class="text-xs text-slate-400">Leitura</div>
+      <div class="text-xs text-slate-400">⏱️ Leitura</div>
       <div id="statTime" class="text-2xl font-bold gradient-text">0m</div>
     </div>
   </div>
 
+  <!-- TABS - TODOS OS RECURSOS -->
   <div class="glass rounded-2xl p-2 mb-6 flex gap-2 overflow-x-auto">
     <button class="tab-btn active" onclick="switchTab('summary', this)">📝 Resumo</button>
-    <button class="tab-btn" onclick="switchTab('chat', this)">💬 Chat</button>
+    <button class="tab-btn" onclick="switchTab('mindmap', this)">🧠 Mapa Mental</button>
+    <button class="tab-btn" onclick="switchTab('quiz', this)">❓ Quiz <span class="ai-badge">IA</span></button>
+    <button class="tab-btn" onclick="switchTab('flashcards', this)">🎴 Flashcards <span class="ai-badge">IA</span></button>
+    <button class="tab-btn" onclick="switchTab('chat', this)">💬 Chat <span class="ai-badge">IA</span></button>
+    <button class="tab-btn" onclick="switchTab('modes', this)">🎭 Modos <span class="ai-badge">IA</span></button>
+    <button class="tab-btn" onclick="switchTab('charts', this)">📊 Gráficos</button>
     <button class="tab-btn" onclick="switchTab('keywords', this)">🏷️ Palavras</button>
   </div>
 
   <div class="glass rounded-3xl p-6 md:p-8 min-h-[500px]">
+    
+    <!-- RESUMO -->
     <div id="tab-summary">
-      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Resumo</div>
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <div>
+          <div class="text-sm text-slate-400 uppercase tracking-wider">📝 Resumo Inteligente</div>
+          <div class="text-xs text-slate-500 mt-1">Gerado automaticamente do seu documento</div>
+        </div>
+        <button class="btn-ghost text-xs px-3 py-2" onclick="regenerateSummary()">🔄 Regenerar</button>
+      </div>
+      <div id="summaryLoading" class="hidden text-center py-12">
+        <div class="loader mx-auto mb-4"></div>
+        <div class="text-sm text-slate-400">IA analisando seu documento...</div>
+      </div>
       <div id="summaryContent" class="space-y-3"></div>
+      <div class="mt-6 pt-6 border-t border-white/5">
+        <div class="text-sm text-slate-400 uppercase tracking-wider mb-3">💡 Ideia central</div>
+        <div id="mainIdea" class="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-cyan-500/10 border border-white/10 text-slate-200"></div>
+      </div>
     </div>
 
+    <!-- MAPA MENTAL -->
+    <div id="tab-mindmap" class="hidden">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <div>
+          <div class="text-sm text-slate-400 uppercase tracking-wider">🧠 Mapa Mental Interativo</div>
+          <div class="text-xs text-slate-500 mt-1">Visualize a estrutura do documento</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-ghost text-xs px-3 py-2" onclick="resetMindmap()">↻ Resetar</button>
+          <button class="btn-ghost text-xs px-3 py-2" onclick="toggleLabels()">🏷️ Rótulos</button>
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 mb-3 bg-white/5 p-3 rounded-lg">💡 <strong>Dica:</strong> Arraste os nós para reorganizar • Scroll para zoom • Passe o mouse para ver detalhes</div>
+      <div class="relative rounded-2xl overflow-hidden" style="background: radial-gradient(circle, rgba(124,92,255,0.1), transparent 70%); height: 600px; border: 1px solid rgba(255,255,255,0.08);">
+        <canvas id="mindmapCanvas" style="width:100%; height:100%; display:block;"></canvas>
+        <div id="mindmapTooltip" class="tooltip"></div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="tab-quiz" class="hidden">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <div>
+          <div class="text-sm text-slate-400 uppercase tracking-wider">❓ Quiz Inteligente</div>
+          <div class="text-xs text-slate-500 mt-1">Teste seu conhecimento sobre o documento</div>
+        </div>
+        <button class="btn-primary text-xs px-4 py-2" onclick="generateQuiz()">🎲 Gerar Quiz</button>
+      </div>
+      <div id="quizLoading" class="hidden text-center py-12">
+        <div class="loader mx-auto mb-4"></div>
+        <div class="text-sm text-slate-400">IA criando perguntas personalizadas...</div>
+      </div>
+      <div id="quizContainer">
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4">🎯</div>
+          <div class="text-lg font-semibold mb-2">Pronto para testar seus conhecimentos?</div>
+          <div class="text-sm text-slate-400 mb-6">Clique em "Gerar Quiz" para criar perguntas sobre o documento</div>
+          <button class="btn-primary" onclick="generateQuiz()">🎲 Gerar Quiz Agora</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div id="tab-flashcards" class="hidden">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <div>
+          <div class="text-sm text-slate-400 uppercase tracking-wider">🎴 Flashcards de Estudo</div>
+          <div class="text-xs text-slate-500 mt-1">Aprenda com perguntas e respostas</div>
+        </div>
+        <button class="btn-primary text-xs px-4 py-2" onclick="generateFlashcards()">✨ Gerar Flashcards</button>
+      </div>
+      <div id="flashcardsLoading" class="hidden text-center py-12">
+        <div class="loader mx-auto mb-4"></div>
+        <div class="text-sm text-slate-400">IA criando flashcards...</div>
+      </div>
+      <div class="flashcard-container" onclick="flipFlashcard()">
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="text-xs uppercase tracking-widest text-slate-400 mb-4">📖 Pergunta</div>
+            <div id="flashcardFront" class="text-lg">Clique em "Gerar Flashcards"</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="text-xs uppercase tracking-widest text-slate-400 mb-4">💡 Resposta</div>
+            <div id="flashcardBack" class="text-lg">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center text-slate-400 text-sm mt-4" id="flashcardCounter">0 / 0</div>
+      <div class="flex justify-center gap-3 mt-4">
+        <button class="btn-ghost" onclick="prevFlashcard()">← Anterior</button>
+        <button class="btn-ghost" onclick="flipFlashcard()">🔄 Virar</button>
+        <button class="btn-ghost" onclick="nextFlashcard()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- CHAT -->
     <div id="tab-chat" class="hidden">
-      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Chat com IA</div>
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">💬 Chat com o Documento</div>
       <div class="glass rounded-2xl p-4 h-96 overflow-y-auto mb-4" id="chatMessages">
-        <div class="text-slate-400 text-sm">Analise um documento primeiro para conversar sobre ele.</div>
+        <div class="chat-msg ai">🤖 Olá! Li seu documento. Pode me perguntar qualquer coisa sobre o conteúdo!</div>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais os pontos principais?')">📌 Pontos principais</button>
+        <button class="btn-ghost text-xs" onclick="sendSuggestion('Explique como para uma criança')">🤔 Explicar simples</button>
+        <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais as conclusões?')">💡 Conclusões</button>
+        <button class="btn-ghost text-xs" onclick="sendSuggestion('Crie um plano de estudo')">📚 Plano de estudo</button>
+        <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais os prós e contras?')">⚖️ Prós e contras</button>
       </div>
       <div class="flex gap-2">
-        <input type="text" id="chatInput" class="input-field flex-1" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter')sendChat()">
-        <button class="btn-primary px-6 rounded-xl" onclick="sendChat()">Enviar</button>
+        <input type="text" id="chatInput" class="input-field flex-1" placeholder="Pergunte algo sobre o documento..." onkeypress="if(event.key==='Enter')sendChat()">
+        <button class="btn-primary" onclick="sendChat()">Enviar</button>
       </div>
     </div>
 
+    <!-- MODOS -->
+    <div id="tab-modes" class="hidden">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-2">🎭 Reescrever em Diferentes Estilos</div>
+      <p class="text-sm text-slate-400 mb-4">A IA reescreve o conteúdo no estilo escolhido</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="modeGrid">
+        <div class="mode-card" onclick="selectMode('crianca')"><div class="text-3xl mb-2">👶</div><div class="text-sm font-semibold">Criança</div></div>
+        <div class="mode-card" onclick="selectMode('teen')"><div class="text-3xl mb-2">🧑‍🎓</div><div class="text-sm font-semibold">Adolescente</div></div>
+        <div class="mode-card" onclick="selectMode('einstein')"><div class="text-3xl mb-2">🧠</div><div class="text-sm font-semibold">Einstein</div></div>
+        <div class="mode-card" onclick="selectMode('pirate')"><div class="text-3xl mb-2">🏴‍☠️</div><div class="text-sm font-semibold">Pirata</div></div>
+        <div class="mode-card" onclick="selectMode('meme')"><div class="text-3xl mb-2">😂</div><div class="text-sm font-semibold">Meme</div></div>
+        <div class="mode-card" onclick="selectMode('formal')"><div class="text-3xl mb-2">🎩</div><div class="text-sm font-semibold">Formal</div></div>
+        <div class="mode-card" onclick="selectMode('twitter')"><div class="text-3xl mb-2">🐦</div><div class="text-sm font-semibold">Twitter</div></div>
+        <div class="mode-card" onclick="selectMode('poema')"><div class="text-3xl mb-2">📜</div><div class="text-sm font-semibold">Poema</div></div>
+      </div>
+      <div id="modeOutput" class="hidden">
+        <div class="glass rounded-2xl p-6">
+          <div class="flex justify-between items-center mb-3">
+            <div class="font-semibold" id="modeOutputTitle">—</div>
+            <button class="btn-ghost text-xs px-3 py-2" onclick="copyModeOutput()">📋 Copiar</button>
+          </div>
+          <div id="modeOutputContent" class="whitespace-pre-wrap leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div id="tab-charts" class="hidden">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">📊 Visualizações</div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass rounded-2xl p-5">
+          <div class="text-sm font-medium mb-3">Top 10 palavras mais frequentes</div>
+          <canvas id="chartWords" height="260"></canvas>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <div class="text-sm font-medium mb-3">Palavras por parágrafo</div>
+          <canvas id="chartParagraphs" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALAVRAS-CHAVE -->
     <div id="tab-keywords" class="hidden">
-      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Palavras-chave</div>
-      <div id="keywordCloud" class="p-6 rounded-2xl bg-white/5 min-h-[300px] flex flex-wrap gap-2"></div>
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">🏷️ Palavras-chave</div>
+      <div id="keywordCloud" class="p-6 rounded-2xl bg-white/5 min-h-[300px] flex flex-wrap gap-2 content-start"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <div class="text-center mb-10">
+    <h2 class="text-3xl font-bold mb-3">🎯 Todos os Recursos</h2>
+    <p class="text-slate-400">Tudo que você precisa para entender qualquer documento</p>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="resource-card" onclick="document.getElementById('fileInput').click()">
+      <div class="text-4xl mb-3">📄</div>
+      <div class="font-semibold mb-1">Upload PDF</div>
+      <div class="text-sm text-slate-400">Arraste ou selecione seu PDF</div>
+    </div>
+    <div class="resource-card" onclick="openTextModal()">
+      <div class="text-4xl mb-3">📝</div>
+      <div class="font-semibold mb-1">Colar Texto</div>
+      <div class="text-sm text-slate-400">Cole qualquer texto para analisar</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">🧠</div>
+      <div class="font-semibold mb-1">Mapa Mental</div>
+      <div class="text-sm text-slate-400">Visualize a estrutura do documento</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">❓</div>
+      <div class="font-semibold mb-1">Quiz IA</div>
+      <div class="text-sm text-slate-400">Teste seu conhecimento</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">🎴</div>
+      <div class="font-semibold mb-1">Flashcards</div>
+      <div class="text-sm text-slate-400">Aprenda com perguntas/respostas</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">💬</div>
+      <div class="font-semibold mb-1">Chat IA</div>
+      <div class="text-sm text-slate-400">Converse sobre o documento</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">🎭</div>
+      <div class="font-semibold mb-1">8 Modos</div>
+      <div class="text-sm text-slate-400">Einstein, pirata, meme e mais</div>
+    </div>
+    <div class="resource-card">
+      <div class="text-4xl mb-3">📊</div>
+      <div class="font-semibold mb-1">Gráficos</div>
+      <div class="text-sm text-slate-400">Visualizações estatísticas</div>
     </div>
   </div>
 </section>
 
+<footer class="border-t border-white/5 py-8 text-center text-sm text-slate-500">
+  <div>PDF Insight Pro © 2026 • IA gratuita via Puter.js • Feito com 💜</div>
+</footer>
+
 <script>
 // ====== STATE ======
 let currentUser = null;
+let userProfile = 'estudante';
 let currentText = '';
 let aiAvailable = false;
+let summaryLevel = 'medium';
+let charts = {};
+let mindmapData = null;
+let mindmapShowLabels = true;
+let flashcards = [];
+let currentFlashcard = 0;
+let quizQuestions = [];
+let quizScore = 0;
+let quizAnswered = 0;
 
 // ====== INIT ======
-console.log('🚀 Iniciando app...');
-
+console.log('🚀 Iniciando PDF Insight Pro...');
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 // Check AI
 async function checkAI() {
+  const status = document.getElementById('aiStatus');
+  const dot = document.getElementById('statusDot');
   try {
     if (typeof puter !== 'undefined' && puter.ai) {
       await puter.ai.chat([{role:'user',content:'oi'}], {model:'gpt-4o-mini'});
       aiAvailable = true;
-      document.getElementById('aiStatus').innerHTML = '✓ IA Online';
-      document.getElementById('aiStatus').style.color = '#34d399';
+      status.textContent = 'IA Online (GPT-4o-mini)';
+      status.style.color = '#34d399';
+      dot.className = 'status-dot online';
       console.log('✓ IA disponível');
     } else {
       throw new Error('Puter não carregou');
     }
   } catch(err) {
     aiAvailable = false;
-    document.getElementById('aiStatus').innerHTML = '⚠ IA Offline';
-    document.getElementById('aiStatus').style.color = '#fbbf24';
+    status.textContent = 'Modo Local (IA offline)';
+    status.style.color = '#fbbf24';
+    dot.className = 'status-dot offline';
     console.warn('⚠ IA offline:', err.message);
   }
 }
 checkAI();
 
+// Load saved user
+function loadSavedUser() {
+  const saved = localStorage.getItem('pdfinsight_user');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      userProfile = currentUser.profile || 'estudante';
+      updateAuthUI();
+      updateProfileUI();
+    } catch(e) {}
+  }
+  renderSavedAccounts();
+}
+loadSavedUser();
+
 // ====== TOAST ======
 function showToast(msg, type='info') {
   const toast = document.getElementById('toast');
-  document.getElementById('toastIcon').textContent = {success:'✓',error:'✕',info:'ℹ'}[type]||'ℹ';
+  document.getElementById('toastIcon').textContent = {success:'✓',error:'✕',info:'ℹ',warn:'⚠'}[type]||'ℹ';
   document.getElementById('toastMsg').textContent = msg;
   toast.className = `toast show ${type}`;
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 // ====== AUTH ======
 function openLogin() {
   document.getElementById('loginModal').classList.add('show');
+  renderSavedAccounts();
 }
 function closeLogin() {
   document.getElementById('loginModal').classList.remove('show');
 }
-function doLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
+function doLogin() {
+  const name = document.getElementById('loginName').value.trim();
+  const email = document.getElementById('loginEmail').value.trim();
   const pwd = document.getElementById('loginPassword').value;
-  if (!email || !pwd) { showToast('Preencha todos os campos', 'error'); return; }
-  currentUser = { name: email.split('@')[0], email };
+  if (!name || !email || !pwd) { showToast('Preencha todos os campos', 'error'); return; }
+  if (pwd.length < 4) { showToast('Senha muito curta (mín. 4)', 'error'); return; }
+  const accounts = JSON.parse(localStorage.getItem('pdfinsight_accounts') || '[]');
+  const existing = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  if (existing) {
+    if (existing.password !== pwd) { showToast('Senha incorreta', 'error'); return; }
+    currentUser = existing;
+  } else {
+    currentUser = { name, email, password: pwd, profile: 'estudante' };
+    accounts.push(currentUser);
+    localStorage.setItem('pdfinsight_accounts', JSON.stringify(accounts));
+  }
+  localStorage.setItem('pdfinsight_user', JSON.stringify(currentUser));
   closeLogin();
-  showToast(`Bem-vindo, ${currentUser.name}! 🎉`, 'success');
+  updateAuthUI();
+  showToast(`Bem-vindo, ${name.split(' ')[0]}! 🎉`, 'success');
+  document.getElementById('loginName').value = '';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
 }
-function doRegister(e) {
-  e.preventDefault();
-  showToast('Conta criada! ✓', 'success');
+function quickLogin(email) {
+  const pwd = prompt(`Senha de ${email}:`);
+  if (!pwd) return;
+  const accounts = JSON.parse(localStorage.getItem('pdfinsight_accounts') || '[]');
+  const acc = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  if (!acc) { showToast('Conta não encontrada', 'error'); return; }
+  if (acc.password !== pwd) { showToast('Senha incorreta', 'error'); return; }
+  currentUser = acc;
+  localStorage.setItem('pdfinsight_user', JSON.stringify(currentUser));
   closeLogin();
+  updateAuthUI();
+  showToast(`Bem-vindo, ${acc.name.split(' ')[0]}! 🎉`, 'success');
+}
+function removeAccount(email) {
+  if (!confirm(`Remover conta ${email}?`)) return;
+  let accounts = JSON.parse(localStorage.getItem('pdfinsight_accounts') || '[]');
+  accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+  localStorage.setItem('pdfinsight_accounts', JSON.stringify(accounts));
+  renderSavedAccounts();
+  showToast('Conta removida', 'info');
+}
+function renderSavedAccounts() {
+  const accounts = JSON.parse(localStorage.getItem('pdfinsight_accounts') || '[]');
+  const container = document.getElementById('savedAccounts');
+  const list = document.getElementById('accountsList');
+  if (accounts.length === 0) { container.classList.add('hidden'); return; }
+  container.classList.remove('hidden');
+  list.innerHTML = accounts.map(a => `
+    <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer">
+      <div class="flex-1 min-w-0" onclick="quickLogin('${a.email.replace(/'/g,"\\'")}')">
+        <div class="text-sm font-medium truncate">${a.name}</div>
+        <div class="text-xs text-slate-400 truncate">${a.email}</div>
+      </div>
+      <button class="text-red-400 text-xs px-2" onclick="event.stopPropagation(); removeAccount('${a.email.replace(/'/g,"\\'")}')">✕</button>
+    </div>
+  `).join('');
+}
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('pdfinsight_user');
+  updateAuthUI();
+  showToast('Você saiu', 'info');
+}
+function updateAuthUI() {
+  const area = document.getElementById('authArea');
+  if (currentUser) {
+    const initials = currentUser.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    area.innerHTML = `
+      <div class="flex items-center gap-3 relative">
+        <div class="text-sm text-slate-400 hidden sm:block">Olá, ${currentUser.name.split(' ')[0]}</div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white cursor-pointer" style="background: linear-gradient(135deg,#7c5cff,#22d3ee)" onclick="toggleUserMenu()">${initials}</div>
+        <div id="userMenu" class="hidden absolute top-14 right-0 glass rounded-xl p-2 min-w-[200px] z-50">
+          <div class="px-3 py-2 border-b border-white/5">
+            <div class="text-sm font-semibold">${currentUser.name}</div>
+            <div class="text-xs text-slate-400">${currentUser.email}</div>
+          </div>
+          <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-sm" onclick="logout()">🚪 Sair</button>
+        </div>
+      </div>
+    `;
+  } else {
+    area.innerHTML = '<button class="btn-ghost" onclick="openLogin()">👤 Entrar</button>';
+  }
+}
+function toggleUserMenu() {
+  const menu = document.getElementById('userMenu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+// ====== PROFILE ======
+function setProfile(p) {
+  userProfile = p;
+  if (currentUser) {
+    currentUser.profile = p;
+    localStorage.setItem('pdfinsight_user', JSON.stringify(currentUser));
+  }
+  updateProfileUI();
+  const names = { estudante: '🎓 Estudante', pesquisador: '🔬 Pesquisador', executivo: '💼 Executivo' };
+  showToast(`Perfil: ${names[p]}`, 'success');
+}
+function updateProfileUI() {
+  document.querySelectorAll('.profile-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.profile === userProfile);
+  });
 }
 
 // ====== TEXT MODAL ======
@@ -400,16 +703,44 @@ function openTextModal() {
 function closeTextModal() {
   document.getElementById('textModal').classList.remove('show');
 }
+function selectLevel(l) {
+  summaryLevel = l;
+  document.querySelectorAll('.level-option').forEach(o => o.classList.toggle('selected', o.dataset.level === l));
+}
+function updateTextCounter() {
+  const t = document.getElementById('textInput').value;
+  document.getElementById('textCounter').textContent = `${t.length} caracteres • ${t.trim() ? t.trim().split(/\s+/).length : 0} palavras`;
+}
+function loadTextExample() {
+  document.getElementById('textTitle').value = 'Mudanças Climáticas';
+  document.getElementById('textInput').value = `Mudanças Climáticas e Aquecimento Global
+
+As mudanças climáticas representam um dos maiores desafios da humanidade no século XXI. O aquecimento global, causado principalmente pela emissão de gases de efeito estufa, tem provocado alterações significativas no clima do planeta.
+
+A queima de combustíveis fósseis, como petróleo, carvão e gás natural, é a principal fonte de emissões de dióxido de carbono (CO2). Essas emissões aumentaram drasticamente desde a Revolução Industrial, elevando a temperatura média global em cerca de 1°C.
+
+Os efeitos já são visíveis: derretimento das calotas polares, elevação do nível do mar, eventos climáticos extremos mais frequentes, secas prolongadas e perda de biodiversidade.
+
+Para combater, é necessária uma transição para energias renováveis, como solar, eólica e hidrelétrica. Práticas de reflorestamento e eficiência energética também são essenciais.
+
+O Acordo de Paris, firmado em 2015, estabeleceu a meta de limitar o aquecimento a 1,5°C. Os esforços atuais ainda são insuficientes.
+
+A ação individual também é importante: reduzir consumo de carne, usar transporte público, economizar energia e apoiar empresas sustentáveis.
+
+O futuro do planeta depende das decisões tomadas hoje. Governos, empresas e cidadãos devem trabalhar juntos.`;
+  updateTextCounter();
+}
 function processText() {
   const text = document.getElementById('textInput').value.trim();
   const title = document.getElementById('textTitle').value.trim() || 'Texto colado';
-  if (text.length < 100) { showToast('Texto muito curto (mín. 100 caracteres)', 'error'); return; }
+  if (text.length < 100) { showToast('Texto muito curto (mín. 100)', 'error'); return; }
   closeTextModal();
   document.getElementById('fileName').textContent = title;
   document.getElementById('fileSize').textContent = `${text.split(/\s+/).length} palavras`;
   document.getElementById('fileInfo').classList.remove('hidden');
   document.getElementById('dropZone').classList.add('hidden');
-  analyzeText(text, Math.ceil(text.split(/\s+/).length / 300));
+  const pages = Math.max(1, Math.ceil(text.split(/\s+/).length / 300));
+  analyzeText(text, pages);
 }
 
 // ====== FILE HANDLING ======
@@ -418,15 +749,21 @@ function handleFile(e) {
   if (!file) return;
   if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
   if (file.size > 20 * 1024 * 1024) { showToast('Arquivo muito grande (máx 20MB)', 'error'); return; }
-  
   document.getElementById('fileName').textContent = file.name;
   document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
   document.getElementById('fileInfo').classList.remove('hidden');
   document.getElementById('dropZone').classList.add('hidden');
-  
   processPDF(file);
 }
-
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') {
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    handleFile({target: {files: [file]}});
+  }
+}
 function resetFile() {
   currentText = '';
   document.getElementById('fileInfo').classList.add('hidden');
@@ -434,41 +771,42 @@ function resetFile() {
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('processing').classList.add('hidden');
   document.getElementById('fileInput').value = '';
+  document.getElementById('textInput').value = '';
+  document.getElementById('textTitle').value = '';
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
-
 function loadDemo() {
   if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
   const demoText = `Inteligência Artificial e Aprendizado de Máquina
 
-A inteligência artificial (IA) é um campo da ciência da computação dedicado à criação de sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana.
+A inteligência artificial (IA) é um campo da ciência da computação dedicado à criação de sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana. Essas tarefas incluem reconhecimento de voz, tomada de decisões e tradução de idiomas.
 
-O aprendizado de máquina é um subconjunto da IA que permite que os sistemas aprendam automaticamente a partir da experiência.
+O aprendizado de máquina (machine learning) é um subconjunto da IA que permite que os sistemas aprendam automaticamente a partir da experiência, sem serem explicitamente programados.
 
-Existem três tipos principais: aprendizado supervisionado, não supervisionado e por reforço.
+Existem três tipos principais: aprendizado supervisionado, não supervisionado e por reforço. No supervisionado, o algoritmo é treinado com dados rotulados. No não supervisionado, encontra padrões em dados não rotulados. No por reforço, aprende por tentativa e erro.
 
-As redes neurais artificiais são inspiradas no cérebro humano e consistem em camadas de nós interconectados.
+As redes neurais artificiais são inspiradas no cérebro humano e consistem em camadas de nós interconectados. As redes profundas (deep learning) possuem muitas camadas.
 
-A IA tem aplicações em medicina, finanças, transporte, educação e muito mais.
+A IA tem aplicações em medicina, finanças, transporte, educação. Na medicina, ajuda no diagnóstico. Nas finanças, detecta fraudes. No transporte, permite veículos autônomos.
 
-Os desafios incluem questões éticas, privacidade e impacto no mercado de trabalho.`;
-  document.getElementById('fileName').textContent = 'demo_ia.pdf';
+Os desafios incluem questões éticas, privacidade, viés algorítmico e impacto no trabalho. É importante desenvolver IA de forma responsável.
+
+O futuro promete avanços em linguagem natural, visão computacional e robótica.`;
+  document.getElementById('fileName').textContent = 'demo_inteligencia_artificial.pdf';
   document.getElementById('fileSize').textContent = 'demo';
   document.getElementById('fileInfo').classList.remove('hidden');
   document.getElementById('dropZone').classList.add('hidden');
   analyzeText(demoText, 8);
 }
-
 async function processPDF(file) {
   document.getElementById('processing').classList.remove('hidden');
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('processingStatus').textContent = 'Lendo arquivo...';
-  
   try {
     const ab = await file.arrayBuffer();
     document.getElementById('processingStatus').textContent = 'Carregando PDF...';
     const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
     document.getElementById('processingStatus').textContent = `Extraindo ${pdf.numPages} páginas...`;
-    
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -476,7 +814,6 @@ async function processPDF(file) {
       fullText += content.items.map(item => item.str).join(' ') + '\n\n';
       document.getElementById('processingStatus').textContent = `Página ${i}/${pdf.numPages}`;
     }
-    
     analyzeText(fullText, pdf.numPages);
   } catch (err) {
     console.error(err);
@@ -500,81 +837,109 @@ async function analyzeText(text, numPages) {
   document.getElementById('docTitle').textContent = `${wordCount.toLocaleString('pt-BR')} palavras • ~${readingTime} min`;
 
   // Keywords
-  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','os','as','ao','é','são','foi','ser','ter','mais','não','mas','ou','se','quando','como','isso','isto','esse','essa','este','seu','sua','meu','minha','nosso','nossa']);
+  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','os','as','ao','aos','é','são','foi','ser','ter','mais','não','mas','ou','se','quando','como','isso','isto','esse','essa','este','seu','sua','meu','minha','nosso','nossa','the','and','of','to','in','is','it','for','that','with','on','are','as','be','this','have','from','or','an','by','at','not','but','what','all','were','we','when','your','can','there','use','each','which','she','do','how','their','if','will','up','other','about','out','many','then','them','these','so','some','her','would','make','like','into','him','has','two','more','go','no','way','could','my','than','first','been','its','who','now','may','down','show','any','such','only','his','one','also','over','after','being','between','both','under','where']);
   const freq = {};
   words.forEach(w => {
-    const lw = w.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç]/g, '');
+    const lw = w.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç0-9]/g, '');
     if (lw.length > 3 && !stopWords.has(lw)) freq[lw] = (freq[lw] || 0) + 1;
   });
   const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 15);
+  const paraStats = paragraphs.map((p, i) => ({
+    idx: i+1,
+    words: p.split(/\s+/).filter(w => w).length,
+    sentences: p.split(/[.!?]+/).filter(s => s.trim().length > 5).length
+  }));
 
-  // Render keywords
-  const cloud = document.getElementById('keywordCloud');
-  const maxFreq = topWords[0]?.[1] || 1;
-  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24'];
-  cloud.innerHTML = topWords.map((w, i) => {
-    const size = 14 + (w[1] / maxFreq) * 20;
-    const color = colors[i % colors.length];
-    return `<span style="font-size:${size}px; padding:4px 10px; border-radius:999px; background:${color}22; color:${color}; border:1px solid ${color}55; margin:3px; display:inline-block">${w[0]} (${w[1]})</span>`;
-  }).join('');
+  renderCharts(topWords, paraStats);
+  renderKeywords(topWords);
+  renderMindmap(topWords, paragraphs);
 
-  // AI Summary
+  // Reset states
+  document.getElementById('chatMessages').innerHTML = '<div class="chat-msg ai">🤖 Li seu documento! Pode me perguntar qualquer coisa.</div>';
+  flashcards = [];
+  currentFlashcard = 0;
+  document.getElementById('flashcardFront').textContent = 'Clique em "Gerar Flashcards"';
+  document.getElementById('flashcardBack').textContent = '—';
+  document.getElementById('flashcardCounter').textContent = '0 / 0';
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="text-center py-12">
+      <div class="text-6xl mb-4">🎯</div>
+      <div class="text-lg font-semibold mb-2">Pronto para testar seus conhecimentos?</div>
+      <div class="text-sm text-slate-400 mb-6">Clique em "Gerar Quiz" para criar perguntas sobre o documento</div>
+      <button class="btn-primary" onclick="generateQuiz()">🎲 Gerar Quiz Agora</button>
+    </div>
+  `;
+  document.getElementById('modeOutput').classList.add('hidden');
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+
   await generateSummary(text);
 
   document.getElementById('processing').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
   document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
-  showToast('Análise concluída! 🎉', 'success');
+  showToast('✅ Análise concluída! Explore todas as abas 🎉', 'success');
 }
 
+// ====== RESUMO ======
 async function generateSummary(text) {
-  const container = document.getElementById('summaryContent');
-  container.innerHTML = '<div class="text-slate-400">Gerando resumo com IA...</div>';
-
+  document.getElementById('summaryLoading').classList.remove('hidden');
+  document.getElementById('summaryContent').innerHTML = '';
+  document.getElementById('mainIdea').textContent = '';
+  
+  const count = summaryLevel === 'short' ? 3 : summaryLevel === 'detailed' ? 10 : 6;
+  
   if (!aiAvailable) {
-    // Fallback local
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
-    const picked = sentences.slice(0, 5);
-    container.innerHTML = picked.map((s, i) => `
-      <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
-        <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
-        <div class="text-slate-200">${s.trim()}</div>
-      </div>
-    `).join('');
+    fallbackSummary(text, count);
+    document.getElementById('summaryLoading').classList.add('hidden');
     return;
   }
 
   try {
-    const prompt = `Resuma o texto em 5 pontos principais. Responda APENAS com JSON: {"summary":["ponto1","ponto2",...]}\n\nTexto:\n${text.slice(0, 5000)}`;
+    const prompt = `Resuma o texto em ${count} pontos principais. Responda APENAS JSON: {"summary":["ponto1",...], "mainIdea":"ideia central"}\n\nTexto:\n${text.slice(0, 6000)}`;
     const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
-    const text = typeof response === 'string' ? response : response?.message?.content || String(response);
-    
-    // Parse JSON
-    const match = text.match(/\{[\s\S]*\}/);
+    const txt = typeof response === 'string' ? response : response?.message?.content || String(response);
+    const match = txt.match(/\{[\s\S]*\}/);
     if (match) {
       const parsed = JSON.parse(match[0]);
-      if (parsed.summary) {
-        container.innerHTML = parsed.summary.map((s, i) => `
-          <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
-            <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
-            <div class="text-slate-200">${s}</div>
+      if (parsed.summary && Array.isArray(parsed.summary)) {
+        document.getElementById('summaryContent').innerHTML = parsed.summary.map((s, i) => `
+          <div class="summary-bullet">
+            <div class="flex gap-3">
+              <div class="text-xs font-bold text-purple-400 mt-1">${String(i+1).padStart(2,'0')}</div>
+              <div class="text-slate-200 leading-relaxed">${s}</div>
+            </div>
           </div>
         `).join('');
+        document.getElementById('mainIdea').textContent = parsed.mainIdea || '';
+        document.getElementById('summaryLoading').classList.add('hidden');
         return;
       }
     }
     throw new Error('Formato inválido');
   } catch(err) {
     console.error('Erro IA:', err);
-    // Fallback
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
-    container.innerHTML = sentences.slice(0, 5).map((s, i) => `
-      <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
-        <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
-        <div class="text-slate-200">${s.trim()}</div>
-      </div>
-    `).join('');
+    fallbackSummary(text, count);
+    showToast('Usando resumo local (IA offline)', 'warn');
   }
+  document.getElementById('summaryLoading').classList.add('hidden');
+}
+function fallbackSummary(text, count) {
+  const sentences = text.replace(/\s+/g, ' ').split(/[.!?]+/).filter(s => s.trim().length > 20);
+  const picked = sentences.slice(0, count);
+  document.getElementById('summaryContent').innerHTML = picked.map((s, i) => `
+    <div class="summary-bullet">
+      <div class="flex gap-3">
+        <div class="text-xs font-bold text-purple-400 mt-1">${String(i+1).padStart(2,'0')}</div>
+        <div class="text-slate-200 leading-relaxed">${s.trim()}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('mainIdea').textContent = sentences[0]?.trim() || '';
+}
+async function regenerateSummary() {
+  if (!currentText) return;
+  await generateSummary(currentText);
+  showToast('Resumo regenerado! ✨', 'success');
 }
 
 // ====== CHAT ======
@@ -582,30 +947,392 @@ async function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if (!msg) return;
-  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
-  if (!aiAvailable) { showToast('IA offline', 'error'); return; }
-  
+  if (!currentText) { showToast('Analise um documento primeiro', 'warn'); return; }
+  if (!aiAvailable) { showToast('IA offline - função indisponível', 'error'); return; }
   input.value = '';
   const chatDiv = document.getElementById('chatMessages');
-  chatDiv.innerHTML += `<div class="mb-3"><div class="text-xs text-slate-400 mb-1">Você:</div><div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">${msg}</div></div>`;
-  chatDiv.innerHTML += `<div class="mb-3"><div class="text-xs text-slate-400 mb-1">IA:</div><div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">Pensando...</div></div>`;
+  chatDiv.innerHTML += `<div class="chat-msg user"><strong>Você:</strong> ${msg}</div>`;
+  const typingId = 'typing-' + Date.now();
+  chatDiv.innerHTML += `<div class="chat-msg ai" id="${typingId}"><strong>IA:</strong> <span class="typing"><span></span><span></span><span></span></span></div>`;
   chatDiv.scrollTop = chatDiv.scrollHeight;
-
   try {
-    const prompt = `Baseado neste texto, responda: ${msg}\n\nTexto:\n${currentText.slice(0, 4000)}`;
+    const prompt = `Baseado neste texto, responda: ${msg}\n\nTexto:\n${currentText.slice(0, 5000)}`;
     const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
     const answer = typeof response === 'string' ? response : response?.message?.content || String(response);
-    
-    const messages = chatDiv.querySelectorAll('div.mb-3');
-    const lastMsg = messages[messages.length - 1];
-    lastMsg.querySelector('div.bg-purple-500\\/10').textContent = answer;
+    document.getElementById(typingId).innerHTML = `<strong>IA:</strong> ${answer}`;
     chatDiv.scrollTop = chatDiv.scrollHeight;
   } catch(err) {
-    const messages = chatDiv.querySelectorAll('div.mb-3');
-    const lastMsg = messages[messages.length - 1];
-    lastMsg.querySelector('div.bg-purple-500\\/10').textContent = '❌ Erro: ' + err.message;
+    document.getElementById(typingId).innerHTML = `<strong>IA:</strong> ❌ Erro: ${err.message}`;
   }
 }
+function sendSuggestion(text) {
+  document.getElementById('chatInput').value = text;
+  sendChat();
+}
+
+// ====== FLASHCARDS ======
+async function generateFlashcards() {
+  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
+  document.getElementById('flashcardsLoading').classList.remove('hidden');
+  
+  if (!aiAvailable) {
+    // Fallback local
+    const sentences = currentText.split(/[.!?]+/).filter(s => s.trim().length > 30);
+    flashcards = sentences.slice(0, 8).map(s => {
+      const parts = s.split(',');
+      return {
+        question: parts[0].trim() + '...?',
+        answer: s.trim()
+      };
+    });
+    currentFlashcard = 0;
+    updateFlashcard();
+    showToast(`${flashcards.length} flashcards criados! 🎴`, 'success');
+    document.getElementById('flashcardsLoading').classList.add('hidden');
+    return;
+  }
+  
+  try {
+    const prompt = `Gere 8 flashcards em JSON: [{"question":"...","answer":"..."},...]\n\nTexto:\n${currentText.slice(0, 5000)}`;
+    const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
+    const txt = typeof response === 'string' ? response : response?.message?.content || String(response);
+    const match = txt.match(/\[[\s\S]*\]/);
+    if (match) {
+      flashcards = JSON.parse(match[0]);
+      currentFlashcard = 0;
+      updateFlashcard();
+      showToast(`${flashcards.length} flashcards! 🎴`, 'success');
+    } else throw new Error('Formato inválido');
+  } catch(err) {
+    console.error(err);
+    showToast('Erro ao gerar flashcards', 'error');
+  }
+  document.getElementById('flashcardsLoading').classList.add('hidden');
+}
+function updateFlashcard() {
+  if (flashcards.length === 0) return;
+  const fc = flashcards[currentFlashcard];
+  document.getElementById('flashcardFront').textContent = fc.question;
+  document.getElementById('flashcardBack').textContent = fc.answer;
+  document.getElementById('flashcardCounter').textContent = `${currentFlashcard + 1} / ${flashcards.length}`;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipFlashcard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextFlashcard() {
+  if (flashcards.length === 0) return;
+  currentFlashcard = (currentFlashcard + 1) % flashcards.length;
+  updateFlashcard();
+}
+function prevFlashcard() {
+  if (flashcards.length === 0) return;
+  currentFlashcard = (currentFlashcard - 1 + flashcards.length) % flashcards.length;
+  updateFlashcard();
+}
+
+// ====== QUIZ ======
+async function generateQuiz() {
+  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
+  document.getElementById('quizLoading').classList.remove('hidden');
+  document.getElementById('quizContainer').innerHTML = '';
+  
+  if (!aiAvailable) {
+    // Fallback local - gera quiz simples
+    generateLocalQuiz();
+    document.getElementById('quizLoading').classList.add('hidden');
+    return;
+  }
+  
+  try {
+    const prompt = `Gere 5 perguntas de múltipla escolha em JSON: [{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."},...]\n\nTexto:\n${currentText.slice(0, 5000)}`;
+    const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
+    const txt = typeof response === 'string' ? response : response?.message?.content || String(response);
+    const match = txt.match(/\[[\s\S]*\]/);
+    if (match) {
+      quizQuestions = JSON.parse(match[0]);
+      quizScore = 0;
+      quizAnswered = 0;
+      renderQuiz();
+      showToast(`${quizQuestions.length} perguntas! ❓`, 'success');
+    } else throw new Error('Formato inválido');
+  } catch(err) {
+    console.error(err);
+    generateLocalQuiz();
+    showToast('Usando quiz local (IA offline)', 'warn');
+  }
+  document.getElementById('quizLoading').classList.add('hidden');
+}
+
+function generateLocalQuiz() {
+  // Gera quiz baseado em palavras-chave do texto
+  const sentences = currentText.split(/[.!?]+/).filter(s => s.trim().length > 30);
+  const words = currentText.split(/\s+/).filter(w => w.length > 5);
+  const uniqueWords = [...new Set(words.map(w => w.toLowerCase()))].slice(0, 20);
+  
+  quizQuestions = [];
+  for (let i = 0; i < Math.min(5, sentences.length); i++) {
+    const sentence = sentences[i].trim();
+    const wordsInSentence = sentence.split(/\s+/).filter(w => w.length > 4);
+    if (wordsInSentence.length < 3) continue;
+    
+    const correctWord = wordsInSentence[Math.floor(Math.random() * wordsInSentence.length)];
+    const wrongWords = uniqueWords.filter(w => !sentence.toLowerCase().includes(w)).slice(0, 3);
+    
+    if (wrongWords.length < 3) continue;
+    
+    const options = [correctWord, ...wrongWords].sort(() => Math.random() - 0.5);
+    const correctIdx = options.indexOf(correctWord);
+    
+    quizQuestions.push({
+      question: `Complete a frase: "${sentence.replace(correctWord, '______')}"`,
+      options: options,
+      correct: correctIdx,
+      explanation: `A palavra correta é "${correctWord}" no contexto: "${sentence}"`
+    });
+  }
+  
+  if (quizQuestions.length === 0) {
+    quizQuestions = [{
+      question: 'Quantas palavras tem aproximadamente o documento?',
+      options: ['Menos de 100', 'Entre 100 e 500', 'Mais de 500', 'Mais de 1000'],
+      correct: currentText.split(/\s+/).length > 500 ? 2 : 1,
+      explanation: `O documento tem ${currentText.split(/\s+/).length} palavras.`
+    }];
+  }
+  
+  quizScore = 0;
+  quizAnswered = 0;
+  renderQuiz();
+  showToast(`${quizQuestions.length} perguntas geradas! ❓`, 'success');
+}
+
+function renderQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = quizQuestions.map((q, qi) => `
+    <div class="glass rounded-2xl p-5 mb-4">
+      <div class="font-medium mb-3"><strong>Pergunta ${qi+1}:</strong> ${q.question}</div>
+      ${q.options.map((opt, oi) => `<div class="quiz-option" onclick="answerQuiz(${qi}, ${oi})" id="qopt-${qi}-${oi}">${String.fromCharCode(65+oi)}) ${opt}</div>`).join('')}
+      <div class="hidden mt-3 text-sm p-3 rounded-lg" id="qexp-${qi}"></div>
+    </div>
+  `).join('');
+}
+function answerQuiz(qi, oi) {
+  const q = quizQuestions[qi];
+  const opts = document.querySelectorAll(`[id^="qopt-${qi}-"]`);
+  if (opts[0].classList.contains('disabled')) return;
+  opts.forEach((o, i) => {
+    o.classList.add('disabled');
+    if (i === q.correct) o.classList.add('correct');
+    else if (i === oi) o.classList.add('wrong');
+  });
+  const exp = document.getElementById(`qexp-${qi}`);
+  exp.classList.remove('hidden');
+  if (oi === q.correct) {
+    quizScore++;
+    exp.className = 'mt-3 text-sm p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-300';
+    exp.innerHTML = `✅ Correto! ${q.explanation || ''}`;
+  } else {
+    exp.className = 'mt-3 text-sm p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300';
+    exp.innerHTML = `❌ Incorreto. ${q.explanation || ''}`;
+  }
+  quizAnswered++;
+  if (quizAnswered === quizQuestions.length) {
+    const pct = Math.round((quizScore / quizQuestions.length) * 100);
+    const msg = pct >= 80 ? '🏆 Excelente!' : pct >= 60 ? '👍 Bom trabalho!' : '📚 Continue estudando!';
+    setTimeout(() => {
+      const score = document.createElement('div');
+      score.className = 'glass rounded-2xl p-8 text-center mt-6';
+      score.innerHTML = `
+        <div class="text-6xl mb-3">${pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚'}</div>
+        <div class="text-sm text-slate-400 mb-2">${msg}</div>
+        <div class="text-6xl font-bold gradient-text">${quizScore}/${quizQuestions.length}</div>
+        <div class="text-slate-400 mt-2">${pct}% de acerto</div>
+        <button class="btn-primary mt-4" onclick="generateQuiz()">🔄 Novo Quiz</button>
+      `;
+      document.getElementById('quizContainer').appendChild(score);
+    }, 500);
+  }
+}
+
+// ====== MODOS ======
+const modePrompts = {
+  crianca: { name: '👶 Criança de 5 anos', instruction: 'Explique como para uma criança de 5 anos. Use palavras simples e analogias com brinquedos.' },
+  teen: { name: '🧑‍🎓 Adolescente', instruction: 'Explique como para um adolescente. Use linguagem descolada e referências a redes sociais.' },
+  einstein: { name: '🧠 Einstein', instruction: 'Explique como Einstein faria. Use analogias brilhantes e insights profundos.' },
+  pirate: { name: '🏴‍☠️ Pirata', instruction: 'Explique como um pirata. Use "arr", "marujo", "tesouro" e expressões piratas.' },
+  meme: { name: '😂 Meme', instruction: 'Explique em formato de memes. Use emojis e humor.' },
+  formal: { name: '🎩 Formal', instruction: 'Reescreva em linguagem acadêmica formal.' },
+  twitter: { name: '🐦 Twitter', instruction: 'Transforme em thread do Twitter com emojis e frases curtas numeradas (1/, 2/).' },
+  poema: { name: '📜 Poema', instruction: 'Transforme em um poema com rimas.' }
+};
+async function selectMode(mode) {
+  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
+  document.querySelectorAll('.mode-card').forEach((c, i) => {
+    c.classList.toggle('selected', Object.keys(modePrompts)[i] === mode);
+  });
+  document.getElementById('modeOutput').classList.remove('hidden');
+  document.getElementById('modeOutputTitle').textContent = modePrompts[mode].name;
+  document.getElementById('modeOutputContent').innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
+  
+  if (!aiAvailable) {
+    // Fallback local
+    document.getElementById('modeOutputContent').textContent = `⚠ IA offline. Modo "${modePrompts[mode].name}" requer conexão com internet para funcionar.`;
+    return;
+  }
+  
+  try {
+    const prompt = `${modePrompts[mode].instruction}\n\nConteúdo:\n${currentText.slice(0, 4000)}`;
+    const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
+    const answer = typeof response === 'string' ? response : response?.message?.content || String(response);
+    document.getElementById('modeOutputContent').textContent = answer;
+  } catch(err) {
+    document.getElementById('modeOutputContent').textContent = '❌ Erro: ' + err.message;
+  }
+}
+function copyModeOutput() {
+  const text = document.getElementById('modeOutputContent').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Copiado! 📋', 'success'));
+}
+
+// ====== CHARTS ======
+function renderCharts(topWords, paraStats) {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
+  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc','#2dd4bf'];
+  try {
+    charts.words = new Chart(document.getElementById('chartWords'), {
+      type: 'bar',
+      data: {
+        labels: topWords.slice(0,10).map(w => w[0]),
+        datasets: [{ data: topWords.slice(0,10).map(w => w[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 2, borderRadius: 8 }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0b4' } }, x: { grid: { display: false }, ticks: { color: '#9aa0b4' } } } }
+    });
+    charts.paragraphs = new Chart(document.getElementById('chartParagraphs'), {
+      type: 'line',
+      data: {
+        labels: paraStats.map(p => `P${p.idx}`),
+        datasets: [{ data: paraStats.map(p => p.words), borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.1)', fill: true, tension: 0.4 }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0b4' } }, x: { grid: { display: false }, ticks: { color: '#9aa0b4' } } } }
+    });
+  } catch(e) { console.error('Erro gráficos:', e); }
+}
+function renderKeywords(topWords) {
+  const cloud = document.getElementById('keywordCloud');
+  const maxFreq = topWords[0]?.[1] || 1;
+  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24'];
+  cloud.innerHTML = topWords.map((w, i) => {
+    const size = 14 + (w[1] / maxFreq) * 24;
+    const color = colors[i % colors.length];
+    return `<span style="font-size:${size}px; padding:4px 10px; border-radius:999px; background:${color}22; color:${color}; border:1px solid ${color}55">${w[0]} <span style="opacity:0.6; font-size:0.8em">(${w[1]})</span></span>`;
+  }).join('');
+}
+
+// ====== MAPA MENTAL ======
+function hexToRgba(hex, alpha) {
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (h.length !== 6) return `rgba(124,92,255,${alpha})`;
+  return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${alpha})`;
+}
+function renderMindmap(topWords, paragraphs) {
+  const canvas = document.getElementById('mindmapCanvas');
+  const container = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = container.clientWidth * dpr;
+  canvas.height = container.clientHeight * dpr;
+  canvas.style.width = container.clientWidth + 'px';
+  canvas.style.height = container.clientHeight + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = container.clientWidth, H = container.clientHeight;
+  const nodes = [];
+  const center = { label: 'Documento', x: W/2, y: H/2, r: 55, color: '#7c5cff', parent: null, level: 0 };
+  nodes.push(center);
+  const topicColors = ['#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc'];
+  const topics = paragraphs.slice(0, 6).map((p, i) => ({
+    name: p.split(/[.!?]/)[0].trim().slice(0, 40) || `Tópico ${i+1}`,
+    keywords: topWords.slice(i*2, i*2+3).map(w => w[0])
+  }));
+  topics.forEach((t, i) => {
+    const angle = (i / topics.length) * Math.PI * 2 - Math.PI/2;
+    const dist = 180;
+    const topicNode = { label: t.name, x: W/2 + Math.cos(angle)*dist, y: H/2 + Math.sin(angle)*dist, r: 38, color: topicColors[i % topicColors.length], parent: center, level: 1 };
+    nodes.push(topicNode);
+    t.keywords.forEach((kw, j) => {
+      const sa = angle + (j-1)*0.4;
+      const sd = dist + 120;
+      nodes.push({ label: kw, x: W/2 + Math.cos(sa)*sd, y: H/2 + Math.sin(sa)*sd, r: 24, color: topicColors[i % topicColors.length], parent: topicNode, level: 2 });
+    });
+  });
+  mindmapData = { nodes, ctx, W, H, canvas, drag: null, zoom: 1, panX: 0, panY: 0 };
+  drawMindmap();
+  setupMindmapEvents();
+}
+function drawMindmap() {
+  if (!mindmapData) return;
+  const { nodes, ctx, W, H, zoom, panX, panY } = mindmapData;
+  ctx.clearRect(0, 0, W, H);
+  nodes.forEach(n => {
+    if (n.parent) {
+      const px = n.parent.x * zoom + panX, py = n.parent.y * zoom + panY;
+      const nx = n.x * zoom + panX, ny = n.y * zoom + panY;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(nx, ny);
+      ctx.strokeStyle = hexToRgba(n.color, 0.5); ctx.lineWidth = Math.max(1, (3-n.level)*zoom); ctx.stroke();
+    }
+  });
+  nodes.forEach(n => {
+    const x = n.x * zoom + panX, y = n.y * zoom + panY, r = n.r * zoom;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 1.8);
+    grad.addColorStop(0, hexToRgba(n.color, 0.3));
+    grad.addColorStop(1, hexToRgba(n.color, 0));
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, r*1.8, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = hexToRgba(n.color, 0.85); ctx.fill();
+    ctx.strokeStyle = n.color; ctx.lineWidth = 3*zoom; ctx.stroke();
+    if (mindmapShowLabels && r > 15) {
+      ctx.fillStyle = 'white';
+      ctx.font = `${Math.max(10, (13-n.level*2)*zoom)}px Inter`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(n.label.slice(0, 20), x, y);
+    }
+  });
+}
+function setupMindmapEvents() {
+  const { canvas } = mindmapData;
+  const tooltip = document.getElementById('mindmapTooltip');
+  const getPos = (e) => { const r = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - r.left, y: cy - r.top }; };
+  const findNode = (x, y) => { const { nodes, zoom, panX, panY } = mindmapData; for (let i = nodes.length-1; i >= 0; i--) { const n = nodes[i]; const nx = n.x*zoom+panX, ny = n.y*zoom+panY, r = n.r*zoom; if ((x-nx)**2 + (y-ny)**2 <= r**2) return n; } return null; };
+  let isDragging = false, lastX = 0, lastY = 0;
+  canvas.addEventListener('mousedown', e => { const p = getPos(e); const n = findNode(p.x, p.y); mindmapData.drag = n || 'pan'; isDragging = true; lastX = p.x; lastY = p.y; });
+  canvas.addEventListener('mousemove', e => {
+    const p = getPos(e);
+    if (isDragging) {
+      const dx = p.x - lastX, dy = p.y - lastY;
+      if (mindmapData.drag === 'pan') { mindmapData.panX += dx; mindmapData.panY += dy; }
+      else if (mindmapData.drag) { mindmapData.drag.x += dx/mindmapData.zoom; mindmapData.drag.y += dy/mindmapData.zoom; }
+      lastX = p.x; lastY = p.y; drawMindmap();
+    } else {
+      const n = findNode(p.x, p.y);
+      if (n) { tooltip.textContent = n.label; tooltip.style.left = (p.x+15)+'px'; tooltip.style.top = (p.y+15)+'px'; tooltip.classList.add('show'); canvas.style.cursor = 'grab'; }
+      else { tooltip.classList.remove('show'); canvas.style.cursor = 'default'; }
+    }
+  });
+  canvas.addEventListener('mouseup', () => { isDragging = false; mindmapData.drag = null; });
+  canvas.addEventListener('mouseleave', () => { isDragging = false; mindmapData.drag = null; tooltip.classList.remove('show'); });
+  canvas.addEventListener('wheel', e => { e.preventDefault(); mindmapData.zoom = Math.max(0.3, Math.min(3, mindmapData.zoom * (e.deltaY > 0 ? 0.9 : 1.1))); drawMindmap(); }, { passive: false });
+}
+function resetMindmap() { 
+  if (currentText) { 
+    const w = currentText.replace(/\s+/g,' ').trim().split(/\s+/).filter(w=>w.length>0); 
+    const freq = {}; 
+    w.forEach(x => { const lw = x.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç0-9]/g,''); if (lw.length>3) freq[lw] = (freq[lw]||0)+1; }); 
+    const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,15); 
+    const p = currentText.split(/\n\s*\n/).filter(p => p.trim().length > 10); 
+    renderMindmap(top, p); 
+  } 
+}
+function toggleLabels() { mindmapShowLabels = !mindmapShowLabels; drawMindmap(); }
 
 // ====== TABS ======
 function switchTab(tab, btn) {
@@ -613,11 +1340,48 @@ function switchTab(tab, btn) {
   btn.classList.add('active');
   document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
   document.getElementById('tab-' + tab).classList.remove('hidden');
+  if (tab === 'mindmap' && mindmapData) {
+    setTimeout(() => {
+      const canvas = document.getElementById('mindmapCanvas');
+      const container = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = container.clientWidth * dpr;
+      canvas.height = container.clientHeight * dpr;
+      canvas.style.width = container.clientWidth + 'px';
+      canvas.style.height = container.clientHeight + 'px';
+      mindmapData.ctx = canvas.getContext('2d');
+      mindmapData.ctx.scale(dpr, dpr);
+      mindmapData.W = container.clientWidth;
+      mindmapData.H = container.clientHeight;
+      drawMindmap();
+    }, 50);
+  }
 }
 
 // ====== EXPORT ======
 function exportReport() {
-  const report = `RELATÓRIO PDF INSIGHT\n======================\nDocumento: ${document.getElementById('fileName').textContent}\nData: ${new Date().toLocaleString('pt-BR')}\n\nEstatísticas:\n- Páginas: ${document.getElementById('statPages').textContent}\n- Palavras: ${document.getElementById('statWords').textContent}\n- Parágrafos: ${document.getElementById('statParagraphs').textContent}\n- Tempo leitura: ${document.getElementById('statTime').textContent}\n\nResumo:\n${document.getElementById('summaryContent').textContent}\n`;
+  const report = `RELATÓRIO PDF INSIGHT PRO
+==========================
+Documento: ${document.getElementById('fileName').textContent}
+Data: ${new Date().toLocaleString('pt-BR')}
+Usuário: ${currentUser?.name || 'N/A'}
+Perfil: ${userProfile}
+
+ESTATÍSTICAS
+------------
+Páginas: ${document.getElementById('statPages').textContent}
+Palavras: ${document.getElementById('statWords').textContent}
+Parágrafos: ${document.getElementById('statParagraphs').textContent}
+Tempo leitura: ${document.getElementById('statTime').textContent}
+
+RESUMO
+-----------
+${document.getElementById('summaryContent').textContent}
+
+IDEIA CENTRAL
+-------------
+${document.getElementById('mainIdea').textContent}
+`;
   const blob = new Blob([report], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
