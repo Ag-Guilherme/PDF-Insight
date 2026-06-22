@@ -1,596 +1,152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PDF Insight Pro — IA Real Gratuita</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Insight Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://js.puter.com/v2/"></script>
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0b0d17;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(255,255,255,0.08);
-    --text: #e6e8ef;
-    --muted: #9aa0b4;
-    --accent: #7c5cff;
-    --accent-2: #22d3ee;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; }
-  body {
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  .bg-grid {
-    position: fixed; inset:0; z-index:-2;
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(124,92,255,0.25), transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(34,211,238,0.18), transparent 45%),
-      radial-gradient(circle at 50% 50%, rgba(244,114,182,0.12), transparent 55%);
-  }
-  .bg-grid::before {
-    content:''; position:absolute; inset:0;
-    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 80%);
-  }
-  .glass {
-    background: var(--card);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(14px);
-  }
-  .gradient-text {
-    background: linear-gradient(90deg, #7c5cff, #22d3ee 50%, #f472b6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .btn-primary {
-    background: linear-gradient(90deg, #7c5cff, #22d3ee);
-    color: white;
-    transition: transform .2s, box-shadow .2s;
-    box-shadow: 0 8px 24px rgba(124,92,255,0.35);
-  }
-  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(124,92,255,0.5); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-ghost {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    color: var(--text);
-    transition: background .2s;
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.08); }
-  .tab-btn {
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 13px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .2s;
-    border: 1px solid transparent;
-    white-space: nowrap;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    color: white;
-    background: rgba(124,92,255,0.15);
-    border-color: rgba(124,92,255,0.4);
-  }
-  .tab-btn .ai-badge {
-    display: inline-block;
-    margin-left: 4px;
-    padding: 1px 5px;
-    font-size: 9px;
-    background: linear-gradient(90deg, #7c5cff, #22d3ee);
-    border-radius: 4px;
-    font-weight: 700;
-    vertical-align: middle;
-  }
-  .drop-zone {
-    border: 2px dashed rgba(124,92,255,0.4);
-    border-radius: 20px;
-    transition: all .3s;
-    background: rgba(124,92,255,0.04);
-  }
-  .drop-zone.drag {
-    border-color: #22d3ee;
-    background: rgba(34,211,238,0.08);
-  }
-  .stat-card {
-    background: linear-gradient(135deg, rgba(124,92,255,0.08), rgba(34,211,238,0.04));
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-  }
-  .fade-in { animation: fadeIn .5s ease-out; }
-  @keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to {opacity:1; transform:none;} }
-  .pulse-dot {
-    width:8px; height:8px; border-radius:50%;
-    background:#22d3ee; box-shadow: 0 0 0 0 rgba(34,211,238,0.6);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(34,211,238,0.6); }
-    70% { box-shadow: 0 0 0 10px rgba(34,211,238,0); }
-    100% { box-shadow: 0 0 0 0 rgba(34,211,238,0); }
-  }
-  .summary-bullet {
-    padding: 12px 16px;
-    border-left: 3px solid #7c5cff;
-    background: rgba(124,92,255,0.06);
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
-  .tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    background: rgba(34,211,238,0.12);
-    color: #22d3ee;
-    border: 1px solid rgba(34,211,238,0.3);
-    margin: 3px;
-  }
-  .loader {
-    width: 40px; height: 40px;
-    border: 3px solid rgba(255,255,255,0.1);
-    border-top-color: #7c5cff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .tooltip {
-    position: absolute;
-    background: #1a1f33;
-    border: 1px solid var(--border);
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .2s;
-    max-width: 320px;
-    z-index: 100;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-  .tooltip.show { opacity: 1; }
-  .tooltip-title { font-weight: 600; margin-bottom: 6px; color: #22d3ee; }
-  .tooltip-content { color: #e6e8ef; line-height: 1.5; }
-  .tooltip-stats { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: #9aa0b4; }
-  .section-title {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(5, 7, 15, 0.75);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none;
-    transition: opacity .3s;
-  }
-  .modal-overlay.show { opacity: 1; pointer-events: auto; }
-  .modal {
-    background: linear-gradient(135deg, #121628 0%, #0b0d17 100%);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 32px;
-    width: 90%; max-width: 560px;
-    max-height: 90vh; overflow-y: auto;
-    transform: scale(0.95) translateY(20px);
-    transition: transform .3s;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-  .modal-overlay.show .modal { transform: scale(1) translateY(0); }
-  .input-field, .textarea-field {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    transition: all .2s;
-    outline: none;
-  }
-  .input-field:focus, .textarea-field:focus {
-    border-color: #7c5cff;
-    background: rgba(124,92,255,0.06);
-    box-shadow: 0 0 0 3px rgba(124,92,255,0.15);
-  }
-  .textarea-field { resize: vertical; min-height: 200px; line-height: 1.6; }
-  .input-field::placeholder, .textarea-field::placeholder { color: #6b7089; }
-  .input-field.error { border-color: #f87171; background: rgba(248,113,113,0.05); }
-  .avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #7c5cff, #22d3ee);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 600; font-size: 14px;
-    cursor: pointer; transition: transform .2s;
-  }
-  .avatar:hover { transform: scale(1.05); }
-  .user-menu {
-    position: absolute; top: calc(100% + 8px); right: 0;
-    background: #121628; border: 1px solid var(--border);
-    border-radius: 12px; padding: 8px;
-    min-width: 260px;
-    opacity: 0; pointer-events: none;
-    transform: translateY(-5px);
-    transition: all .2s;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    z-index: 50;
-  }
-  .user-menu.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
-  .user-menu-item {
-    padding: 10px 12px; border-radius: 8px;
-    cursor: pointer; transition: background .2s;
-    display: flex; align-items: center; gap: 10px;
-    font-size: 14px; color: var(--text);
-  }
-  .user-menu-item:hover { background: rgba(255,255,255,0.06); }
-  .user-menu-item.danger { color: #f87171; }
-  .user-menu-divider { height: 1px; background: var(--border); margin: 6px 0; }
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: #121628; border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 20px;
-    display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    z-index: 2000;
-    transform: translateY(20px); opacity: 0;
-    transition: all .3s; max-width: 360px;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { border-left: 3px solid #34d399; }
-  .toast.error { border-left: 3px solid #f87171; }
-  .toast.info { border-left: 3px solid #22d3ee; }
-  .auth-tabs {
-    display: flex; background: rgba(255,255,255,0.03);
-    border-radius: 10px; padding: 4px; margin-bottom: 20px;
-  }
-  .auth-tab {
-    flex: 1; padding: 8px; text-align: center;
-    border-radius: 7px; font-size: 13px; font-weight: 500;
-    color: var(--muted); cursor: pointer; transition: all .2s;
-  }
-  .auth-tab.active { background: rgba(124,92,255,0.2); color: white; }
-  .auth-form { display: none; }
-  .auth-form.active { display: block; }
-  .account-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px; border-radius: 10px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    cursor: pointer; transition: all .2s;
-  }
-  .account-item:hover { background: rgba(124,92,255,0.08); }
-  .account-item.current { border-color: #22d3ee; background: rgba(34,211,238,0.08); }
-  .account-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg, #7c5cff, #22d3ee);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 600; font-size: 12px; flex-shrink: 0;
-  }
-  .account-remove {
-    margin-left: auto; padding: 4px 8px;
-    font-size: 11px; color: #f87171;
-    cursor: pointer; border-radius: 6px;
-  }
-  .account-remove:hover { background: rgba(248,113,113,0.1); }
-  .level-selector {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 8px; margin-top: 12px;
-  }
-  .level-option {
-    padding: 12px 8px; border-radius: 10px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    cursor: pointer; transition: all .2s;
-    text-align: center;
-  }
-  .level-option.selected {
-    background: rgba(124,92,255,0.15);
-    border-color: rgba(124,92,255,0.5);
-  }
-  .level-option .level-icon { font-size: 20px; margin-bottom: 4px; }
-  .level-option .level-name { font-size: 13px; font-weight: 600; }
-  .level-option .level-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* ===== CHAT ===== */
-  .chat-container {
-    display: flex; flex-direction: column;
-    height: 550px;
-    background: rgba(0,0,0,0.2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .chat-messages {
-    flex: 1; overflow-y: auto;
-    padding: 20px;
-    display: flex; flex-direction: column;
-    gap: 16px;
-  }
-  .chat-msg {
-    display: flex; gap: 12px;
-    max-width: 85%;
-    animation: fadeIn .3s ease-out;
-  }
-  .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
-  .chat-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 16px;
-  }
-  .chat-msg.ai .chat-avatar {
-    background: linear-gradient(135deg, #7c5cff, #22d3ee);
-  }
-  .chat-msg.user .chat-avatar {
-    background: rgba(255,255,255,0.1);
-  }
-  .chat-bubble {
-    padding: 12px 16px;
-    border-radius: 16px;
-    line-height: 1.5;
-    font-size: 14px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-  .chat-msg.ai .chat-bubble {
-    background: rgba(124,92,255,0.1);
-    border: 1px solid rgba(124,92,255,0.2);
-    border-top-left-radius: 4px;
-  }
-  .chat-msg.user .chat-bubble {
-    background: rgba(34,211,238,0.1);
-    border: 1px solid rgba(34,211,238,0.2);
-    border-top-right-radius: 4px;
-  }
-  .chat-input-area {
-    padding: 16px;
-    border-top: 1px solid var(--border);
-    display: flex; gap: 10px;
-    background: rgba(0,0,0,0.3);
-  }
-  .chat-input {
-    flex: 1;
-    padding: 12px 16px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    outline: none;
-    resize: none;
-    max-height: 120px;
-  }
-  .chat-input:focus { border-color: #7c5cff; }
-  .chat-send {
-    padding: 0 20px;
-    background: linear-gradient(90deg, #7c5cff, #22d3ee);
-    border: none; border-radius: 12px;
-    color: white; font-weight: 600;
-    cursor: pointer; transition: transform .2s;
-  }
-  .chat-send:hover:not(:disabled) { transform: scale(1.05); }
-  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
-  .chat-suggestions {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: rgba(0,0,0,0.2);
-  }
-  .chat-suggestion {
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .chat-suggestion:hover {
-    background: rgba(124,92,255,0.1);
-    border-color: rgba(124,92,255,0.3);
-  }
-  .typing-indicator {
-    display: inline-flex; gap: 4px;
-    padding: 8px 12px;
-  }
-  .typing-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #7c5cff;
-    animation: typing 1.4s infinite;
-  }
-  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes typing {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-8px); opacity: 1; }
-  }
-
-  /* ===== FLASHCARDS ===== */
-  .flashcard-container {
-    perspective: 1500px;
-    width: 100%; max-width: 500px;
-    height: 320px;
-    margin: 0 auto;
-  }
-  .flashcard {
-    position: relative;
-    width: 100%; height: 100%;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    cursor: pointer;
-  }
-  .flashcard.flipped { transform: rotateY(180deg); }
-  .flashcard-face {
-    position: absolute;
-    width: 100%; height: 100%;
-    backface-visibility: hidden;
-    border-radius: 20px;
-    padding: 32px;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    text-align: center;
-    border: 1px solid var(--border);
-  }
-  .flashcard-front {
-    background: linear-gradient(135deg, rgba(124,92,255,0.15), rgba(34,211,238,0.08));
-  }
-  .flashcard-back {
-    background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(244,114,182,0.08));
-    transform: rotateY(180deg);
-  }
-  .flashcard-label {
-    font-size: 11px; text-transform: uppercase;
-    letter-spacing: 2px; color: var(--muted);
-    margin-bottom: 16px;
-  }
-  .flashcard-text {
-    font-size: 18px; line-height: 1.5;
-    font-weight: 500;
-  }
-  .flashcard-controls {
-    display: flex; justify-content: center; gap: 12px;
-    margin-top: 24px;
-  }
-  .flashcard-counter {
-    text-align: center; margin-top: 16px;
-    color: var(--muted); font-size: 13px;
-  }
-
-  /* ===== QUIZ ===== */
-  .quiz-question {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .quiz-question-text {
-    font-size: 16px; font-weight: 500;
-    margin-bottom: 16px; line-height: 1.5;
-  }
-  .quiz-option {
-    padding: 12px 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all .2s;
-    font-size: 14px;
-  }
-  .quiz-option:hover:not(.disabled) {
-    background: rgba(124,92,255,0.08);
-    border-color: rgba(124,92,255,0.3);
-  }
-  .quiz-option.correct {
-    background: rgba(52, 211, 153, 0.15);
-    border-color: #34d399;
-  }
-  .quiz-option.wrong {
-    background: rgba(248, 113, 113, 0.15);
-    border-color: #f87171;
-  }
-  .quiz-option.disabled { cursor: default; }
-  .quiz-score {
-    text-align: center;
-    padding: 32px;
-    background: linear-gradient(135deg, rgba(124,92,255,0.1), rgba(34,211,238,0.05));
-    border: 1px solid var(--border);
-    border-radius: 20px;
-  }
-  .quiz-score-number {
-    font-size: 64px; font-weight: 800;
-    background: linear-gradient(90deg, #7c5cff, #22d3ee);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* ===== PROFILE SELECTOR ===== */
-  .profile-chip {
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all .2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .profile-chip:hover { background: rgba(255,255,255,0.08); }
-  .profile-chip.active {
-    background: linear-gradient(90deg, rgba(124,92,255,0.2), rgba(34,211,238,0.15));
-    border-color: rgba(124,92,255,0.4);
-  }
-
-  /* ===== MODE SELECTOR ===== */
-  .mode-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-  }
-  .mode-card {
-    padding: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all .2s;
-    text-align: center;
-  }
-  .mode-card:hover {
-    background: rgba(124,92,255,0.08);
-    transform: translateY(-2px);
-  }
-  .mode-card.selected {
-    background: rgba(124,92,255,0.15);
-    border-color: rgba(124,92,255,0.5);
-  }
-  .mode-icon { font-size: 28px; margin-bottom: 6px; }
-  .mode-name { font-size: 13px; font-weight: 600; }
-  .mode-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  .ai-thinking {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px;
-    background: rgba(124,92,255,0.1);
-    border: 1px solid rgba(124,92,255,0.3);
-    border-radius: 999px;
-    font-size: 11px;
-    color: #a78bfa;
-  }
-  .ai-thinking::before {
-    content: ''; width: 6px; height: 6px;
-    border-radius: 50%; background: #7c5cff;
-    animation: pulse 1.5s infinite;
-  }
-
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+* { box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0b0d17;
+  color: #e6e8ef;
+  margin: 0;
+  padding: 0;
+}
+.bg-grid {
+  position: fixed; inset:0; z-index:-2;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(124,92,255,0.25), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(34,211,238,0.18), transparent 45%);
+}
+.glass {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+}
+.gradient-text {
+  background: linear-gradient(90deg, #7c5cff, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #7c5cff, #22d3ee);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: transform .2s;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #e6e8ef;
+  cursor: pointer;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); }
+.drop-zone {
+  border: 2px dashed rgba(124,92,255,0.4);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .3s;
+}
+.drop-zone:hover {
+  border-color: #22d3ee;
+  background: rgba(34,211,238,0.08);
+}
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(5, 7, 15, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #121628;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 32px;
+  width: 90%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: #e6e8ef;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.input-field:focus {
+  border-color: #7c5cff;
+}
+.textarea-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: #e6e8ef;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+  min-height: 200px;
+}
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #121628;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 20px;
+  z-index: 2000;
+  display: none;
+}
+.toast.show { display: flex; }
+.toast.success { border-left: 3px solid #34d399; }
+.toast.error { border-left: 3px solid #f87171; }
+.toast.info { border-left: 3px solid #22d3ee; }
+.loader {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: #7c5cff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.tab-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 13px;
+  color: #9aa0b4;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+}
+.tab-btn:hover { color: #e6e8ef; }
+.tab-btn.active {
+  color: white;
+  background: rgba(124,92,255,0.15);
+  border-color: rgba(124,92,255,0.4);
+}
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -598,160 +154,63 @@
 
 <!-- HEADER -->
 <header class="sticky top-0 z-40 glass border-b border-white/5">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg,#7c5cff,#22d3ee);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
       <div>
-        <div class="font-bold text-lg flex items-center gap-2">
-          PDF Insight <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 text-white font-bold">PRO</span>
-        </div>
-        <div class="text-xs text-slate-400">IA real • 100% gratuito</div>
+        <div class="font-bold text-lg">PDF Insight <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 text-white">PRO</span></div>
+        <div class="text-xs text-slate-400" id="aiStatus">⏳ Verificando IA...</div>
       </div>
     </div>
-    <div class="hidden md:flex items-center gap-2">
-      <div class="profile-chip" data-profile="estudante" onclick="setProfile('estudante')">🎓 Estudante</div>
-      <div class="profile-chip" data-profile="pesquisador" onclick="setProfile('pesquisador')">🔬 Pesquisador</div>
-      <div class="profile-chip" data-profile="executivo" onclick="setProfile('executivo')">💼 Executivo</div>
-    </div>
-    <div class="relative" id="authArea">
-      <button id="loginBtn" class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="openLoginModal()">Entrar</button>
-      <div id="userArea" class="hidden items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-          <span class="pulse-dot"></span>
-          <span id="userGreeting">Olá</span>
-        </div>
-        <div class="avatar" id="userAvatar" onclick="toggleUserMenu(event)">?</div>
-        <div class="user-menu" id="userMenu">
-          <div class="px-3 py-2">
-            <div class="text-sm font-semibold" id="menuUserName">—</div>
-            <div class="text-xs text-slate-400" id="menuUserEmail">—</div>
-            <div class="text-xs text-purple-400 mt-1" id="menuUserProfile">—</div>
-          </div>
-          <div class="user-menu-divider"></div>
-          <div class="text-xs text-slate-500 px-3 py-1 uppercase tracking-wider">Perfil</div>
-          <div class="user-menu-item" onclick="setProfile('estudante'); toggleUserMenu(null,true)">🎓 Estudante</div>
-          <div class="user-menu-item" onclick="setProfile('pesquisador'); toggleUserMenu(null,true)">🔬 Pesquisador</div>
-          <div class="user-menu-item" onclick="setProfile('executivo'); toggleUserMenu(null,true)">💼 Executivo</div>
-          <div class="user-menu-divider"></div>
-          <div class="user-menu-item" onclick="showHistory()"><span>📚</span> Histórico</div>
-          <div class="user-menu-item" onclick="openLoginModal('switch')"><span>🔄</span> Trocar conta</div>
-          <div class="user-menu-divider"></div>
-          <div class="user-menu-item danger" onclick="logout()"><span>🚪</span> Sair</div>
-        </div>
-      </div>
-    </div>
+    <button class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="openLogin()">Entrar</button>
   </div>
 </header>
 
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
-    <div class="flex items-start justify-between mb-5">
-      <div>
-        <div class="text-2xl font-bold mb-1" id="modalTitle">Acesse sua conta 👋</div>
-        <div class="text-sm text-slate-400" id="modalSubtitle">Entre ou crie uma conta</div>
-      </div>
-      <button class="text-slate-400 hover:text-white text-2xl leading-none" onclick="closeLoginModal()">×</button>
+    <div class="flex justify-between items-start mb-5">
+      <div class="text-2xl font-bold">Entrar 👋</div>
+      <button onclick="closeLogin()" class="text-2xl text-slate-400 hover:text-white">×</button>
     </div>
-    <div class="auth-tabs">
-      <div class="auth-tab active" data-form="login" onclick="switchAuthForm('login')">Entrar</div>
-      <div class="auth-tab" data-form="register" onclick="switchAuthForm('register')">Criar conta</div>
-    </div>
-    <form class="auth-form active" id="loginForm" onsubmit="event.preventDefault(); doLogin();">
+    <form onsubmit="doLogin(event)">
       <div class="space-y-3">
         <div>
           <label class="text-xs text-slate-400 mb-1.5 block">E-mail</label>
-          <input type="email" id="loginEmail" class="input-field" placeholder="voce@exemplo.com" />
+          <input type="email" id="loginEmail" class="input-field" placeholder="voce@exemplo.com" required>
         </div>
         <div>
           <label class="text-xs text-slate-400 mb-1.5 block">Senha</label>
-          <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" />
+          <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-medium mt-2">Entrar</button>
+        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-medium">Entrar</button>
       </div>
     </form>
-    <form class="auth-form" id="registerForm" onsubmit="event.preventDefault(); doRegister();">
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs text-slate-400 mb-1.5 block">Nome</label>
-          <input type="text" id="regName" class="input-field" placeholder="Seu nome" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-400 mb-1.5 block">E-mail</label>
-          <input type="email" id="regEmail" class="input-field" placeholder="voce@exemplo.com" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-400 mb-1.5 block">Senha (mín. 4)</label>
-          <input type="password" id="regPassword" class="input-field" placeholder="Crie uma senha" />
-        </div>
-        <button type="submit" class="btn-primary w-full py-3 rounded-xl font-medium mt-2">Criar conta</button>
-      </div>
-    </form>
-    <div id="savedAccounts" class="hidden mt-5">
-      <div class="text-xs text-slate-400 mb-2">Contas salvas:</div>
-      <div id="accountsList" class="space-y-2"></div>
+    <div class="text-center mt-4 text-sm text-slate-400">
+      Não tem conta? <a href="#" onclick="doRegister(event)" class="text-purple-400 hover:text-purple-300">Criar conta</a>
     </div>
-    <div class="relative my-5">
-      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
-      <div class="relative flex justify-center text-xs"><span class="px-3 bg-[#0f1220] text-slate-500">ou</span></div>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <button class="btn-ghost py-2.5 rounded-xl text-sm" onclick="socialLogin('Google')">🔵 Google</button>
-      <button class="btn-ghost py-2.5 rounded-xl text-sm" onclick="socialLogin('GitHub')">⚫ GitHub</button>
-    </div>
-    <button class="w-full py-2 text-sm text-slate-400 hover:text-white transition mt-2" onclick="guestLogin()">Continuar como convidado →</button>
   </div>
 </div>
 
-<!-- TEXT INPUT MODAL -->
+<!-- TEXT MODAL -->
 <div class="modal-overlay" id="textModal">
   <div class="modal" style="max-width: 640px;">
-    <div class="flex items-start justify-between mb-5">
+    <div class="flex justify-between items-start mb-5">
+      <div class="text-2xl font-bold">📝 Colar texto</div>
+      <button onclick="closeTextModal()" class="text-2xl text-slate-400 hover:text-white">×</button>
+    </div>
+    <div class="space-y-3">
       <div>
-        <div class="text-2xl font-bold mb-1">📝 Colar texto</div>
-        <div class="text-sm text-slate-400">Cole qualquer texto e receba análise com IA real</div>
+        <label class="text-xs text-slate-400 mb-1.5 block">Título</label>
+        <input type="text" id="textTitle" class="input-field" placeholder="Ex: Meu documento">
       </div>
-      <button class="text-slate-400 hover:text-white text-2xl leading-none" onclick="closeTextModal()">×</button>
-    </div>
-    <div>
-      <label class="text-xs text-slate-400 mb-1.5 block">Título (opcional)</label>
-      <input type="text" id="textTitle" class="input-field mb-4" placeholder="Ex: Resumo do capítulo 3" />
-    </div>
-    <div>
-      <label class="text-xs text-slate-400 mb-1.5 block flex justify-between">
-        <span>Texto</span>
-        <span id="textCounter" class="text-slate-500">0 caracteres</span>
-      </label>
-      <textarea id="textInput" class="textarea-field" placeholder="Cole aqui o texto que deseja analisar..."></textarea>
-    </div>
-    <div class="mt-4">
-      <label class="text-xs text-slate-400 mb-2 block">Nível do resumo</label>
-      <div class="level-selector">
-        <div class="level-option" data-level="short" onclick="selectSummaryLevel('short')">
-          <div class="level-icon">⚡</div>
-          <div class="level-name">Curto</div>
-          <div class="level-desc">3 pontos</div>
-        </div>
-        <div class="level-option selected" data-level="medium" onclick="selectSummaryLevel('medium')">
-          <div class="level-icon">📋</div>
-          <div class="level-name">Médio</div>
-          <div class="level-desc">6 pontos</div>
-        </div>
-        <div class="level-option" data-level="detailed" onclick="selectSummaryLevel('detailed')">
-          <div class="level-icon">📖</div>
-          <div class="level-name">Detalhado</div>
-          <div class="level-desc">10 pontos</div>
-        </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 block">Texto</label>
+        <textarea id="textInput" class="textarea-field" placeholder="Cole seu texto aqui..."></textarea>
       </div>
-    </div>
-    <div class="flex gap-3 mt-6">
-      <button class="btn-ghost flex-1 py-3 rounded-xl font-medium" onclick="closeTextModal()">Cancelar</button>
-      <button class="btn-primary flex-1 py-3 rounded-xl font-medium" onclick="processText()">✨ Analisar com IA</button>
-    </div>
-    <div class="mt-4 text-center">
-      <button class="text-xs text-slate-500 hover:text-slate-300 transition" onclick="loadTextExample()">💡 Carregar exemplo</button>
+      <button onclick="processText()" class="btn-primary w-full py-3 rounded-xl font-medium">✨ Analisar</button>
     </div>
   </div>
 </div>
@@ -759,54 +218,40 @@
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toastIcon">✓</span>
-  <span id="toastMsg" class="text-sm"></span>
+  <span id="toastMsg" class="text-sm ml-2"></span>
 </div>
 
 <!-- HERO -->
-<section id="upload" class="max-w-7xl mx-auto px-6 pt-16 pb-10">
+<section class="max-w-7xl mx-auto px-6 pt-16 pb-10">
   <div class="grid md:grid-cols-2 gap-10 items-center">
     <div>
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs mb-5">
-        <span class="pulse-dot"></span>
-        <span class="text-slate-300">Powered by GPT-4o-mini + Claude via Puter.js</span>
-      </div>
       <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-        IA <span class="gradient-text">real e gratuita</span> para<br/>
-        entender qualquer documento.
+        IA <span class="gradient-text">real e gratuita</span> para<br>entender documentos
       </h1>
-      <p class="text-slate-400 text-lg mb-8 max-w-lg">
-        Chat inteligente, flashcards automáticos, quiz, resumos contextuais e mapa mental — tudo com IA de verdade, sem API keys, 100% grátis.
+      <p class="text-slate-400 text-lg mb-8">
+        Chat, flashcards, quiz e resumos com IA de verdade. 100% grátis.
       </p>
       <div class="flex flex-wrap gap-3">
         <button class="btn-primary px-6 py-3 rounded-xl font-medium" onclick="document.getElementById('fileInput').click()">📄 Enviar PDF</button>
         <button class="btn-ghost px-6 py-3 rounded-xl font-medium" onclick="openTextModal()">📝 Colar texto</button>
         <button class="btn-ghost px-6 py-3 rounded-xl font-medium" onclick="loadDemo()">▶️ Demo</button>
       </div>
-      <input type="file" id="fileInput" accept="application/pdf" class="hidden" />
-      <div class="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-500">
-        <div class="flex items-center gap-1">🤖 IA real (não fake)</div>
-        <div class="flex items-center gap-1">💸 100% gratuito</div>
-        <div class="flex items-center gap-1">🔑 Sem API keys</div>
-        <div class="flex items-center gap-1">🔒 Privado</div>
-      </div>
+      <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="handleFile(event)">
     </div>
-    <div class="relative">
-      <div class="glass rounded-3xl p-6">
-        <div id="dropZone" class="drop-zone p-10 text-center">
-          <div class="text-6xl mb-4">📑</div>
-          <div class="text-lg font-semibold mb-2">Arraste seu PDF aqui</div>
-          <div class="text-sm text-slate-400 mb-4">ou clique para selecionar</div>
-          <div class="text-xs text-slate-500">Máximo 20MB</div>
-        </div>
-        <div id="fileInfo" class="hidden mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="text-3xl" id="fileIcon">📄</div>
-            <div class="flex-1">
-              <div id="fileName" class="font-medium text-sm truncate"></div>
-              <div id="fileSize" class="text-xs text-slate-400"></div>
-            </div>
-            <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="resetFile()">Remover</button>
+    <div class="glass rounded-3xl p-6">
+      <div id="dropZone" class="drop-zone p-10 text-center" onclick="document.getElementById('fileInput').click()">
+        <div class="text-6xl mb-4">📑</div>
+        <div class="text-lg font-semibold mb-2">Arraste seu PDF aqui</div>
+        <div class="text-sm text-slate-400">ou clique para selecionar</div>
+      </div>
+      <div id="fileInfo" class="hidden mt-4 p-4 rounded-xl bg-white/5">
+        <div class="flex items-center gap-3">
+          <div class="text-3xl">📄</div>
+          <div class="flex-1">
+            <div id="fileName" class="font-medium text-sm truncate"></div>
+            <div id="fileSize" class="text-xs text-slate-400"></div>
           </div>
+          <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="resetFile()">Remover</button>
         </div>
       </div>
     </div>
@@ -817,23 +262,17 @@
 <div id="processing" class="hidden max-w-7xl mx-auto px-6 py-10">
   <div class="glass rounded-3xl p-10 text-center">
     <div class="loader mx-auto mb-4"></div>
-    <div class="text-lg font-semibold mb-2">Analisando com IA...</div>
+    <div class="text-lg font-semibold mb-2">Analisando...</div>
     <div id="processingStatus" class="text-sm text-slate-400">Extraindo texto</div>
-    <div class="mt-6 w-full max-w-md mx-auto h-2 bg-white/5 rounded-full overflow-hidden">
-      <div id="progressBar" class="h-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all" style="width:0%"></div>
-    </div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
-<section id="dashboard" class="hidden max-w-7xl mx-auto px-6 py-10 fade-in">
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<section id="dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
+  <div class="flex justify-between items-center mb-6">
     <div>
-      <h2 class="text-2xl font-bold flex items-center gap-2">
-        Análise com IA
-        <span class="ai-thinking">IA processando</span>
-      </h2>
-      <p id="docTitle" class="text-sm text-slate-400 mt-1">—</p>
+      <h2 class="text-2xl font-bold">Análise com IA</h2>
+      <p id="docTitle" class="text-sm text-slate-400 mt-1"></p>
     </div>
     <div class="flex gap-2">
       <button class="btn-ghost px-4 py-2 rounded-lg text-sm" onclick="exportReport()">📥 Exportar</button>
@@ -842,1256 +281,352 @@
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card">
-      <div class="text-xs text-slate-400 mb-1">Páginas</div>
+    <div class="glass rounded-2xl p-4">
+      <div class="text-xs text-slate-400">Páginas</div>
       <div id="statPages" class="text-2xl font-bold gradient-text">0</div>
     </div>
-    <div class="stat-card">
-      <div class="text-xs text-slate-400 mb-1">Palavras</div>
+    <div class="glass rounded-2xl p-4">
+      <div class="text-xs text-slate-400">Palavras</div>
       <div id="statWords" class="text-2xl font-bold gradient-text">0</div>
     </div>
-    <div class="stat-card">
-      <div class="text-xs text-slate-400 mb-1">Parágrafos</div>
+    <div class="glass rounded-2xl p-4">
+      <div class="text-xs text-slate-400">Parágrafos</div>
       <div id="statParagraphs" class="text-2xl font-bold gradient-text">0</div>
     </div>
-    <div class="stat-card">
-      <div class="text-xs text-slate-400 mb-1">Leitura</div>
+    <div class="glass rounded-2xl p-4">
+      <div class="text-xs text-slate-400">Leitura</div>
       <div id="statTime" class="text-2xl font-bold gradient-text">0m</div>
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="glass rounded-2xl p-2 mb-6 flex gap-2 overflow-x-auto">
-    <button class="tab-btn active" data-tab="summary">📝 Resumo</button>
-    <button class="tab-btn" data-tab="chat">💬 Chat IA <span class="ai-badge">IA</span></button>
-    <button class="tab-btn" data-tab="flashcards">🎴 Flashcards <span class="ai-badge">IA</span></button>
-    <button class="tab-btn" data-tab="quiz">❓ Quiz <span class="ai-badge">IA</span></button>
-    <button class="tab-btn" data-tab="modes">🎭 Modos <span class="ai-badge">IA</span></button>
-    <button class="tab-btn" data-tab="mindmap">🧠 Mapa</button>
-    <button class="tab-btn" data-tab="charts">📊 Gráficos</button>
-    <button class="tab-btn" data-tab="keywords">🏷️ Palavras</button>
+    <button class="tab-btn active" onclick="switchTab('summary', this)">📝 Resumo</button>
+    <button class="tab-btn" onclick="switchTab('chat', this)">💬 Chat</button>
+    <button class="tab-btn" onclick="switchTab('keywords', this)">🏷️ Palavras</button>
   </div>
 
   <div class="glass rounded-3xl p-6 md:p-8 min-h-[500px]">
-
-    <!-- SUMMARY -->
-    <div id="tab-summary" class="tab-content">
-      <div class="flex items-center justify-between mb-4">
-        <div class="section-title mb-0">Resumo gerado por IA</div>
-        <button class="btn-ghost px-3 py-1.5 rounded-lg text-xs" onclick="regenerateSummary()">🔄 Regenerar</button>
-      </div>
-      <div id="summaryLoading" class="hidden text-center py-12">
-        <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA está analisando seu documento...</div>
-      </div>
+    <div id="tab-summary">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Resumo</div>
       <div id="summaryContent" class="space-y-3"></div>
-      <div class="mt-6 pt-6 border-t border-white/5">
-        <div class="section-title">Ideia central</div>
-        <div id="mainIdea" class="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-cyan-500/10 border border-white/10 text-slate-200"></div>
+    </div>
+
+    <div id="tab-chat" class="hidden">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Chat com IA</div>
+      <div class="glass rounded-2xl p-4 h-96 overflow-y-auto mb-4" id="chatMessages">
+        <div class="text-slate-400 text-sm">Analise um documento primeiro para conversar sobre ele.</div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="chatInput" class="input-field flex-1" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter')sendChat()">
+        <button class="btn-primary px-6 rounded-xl" onclick="sendChat()">Enviar</button>
       </div>
     </div>
 
-    <!-- CHAT -->
-    <div id="tab-chat" class="tab-content hidden">
-      <div class="section-title">Converse com seu documento</div>
-      <div class="chat-container">
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg ai">
-            <div class="chat-avatar">🤖</div>
-            <div class="chat-bubble">Olá! Li seu documento e estou pronto para ajudar. Pode me perguntar qualquer coisa sobre o conteúdo. 😊</div>
-          </div>
-        </div>
-        <div class="chat-suggestions" id="chatSuggestions">
-          <div class="chat-suggestion" onclick="sendSuggestion(this)">📌 Quais os pontos principais?</div>
-          <div class="chat-suggestion" onclick="sendSuggestion(this)">🤔 Explique como para uma criança</div>
-          <div class="chat-suggestion" onclick="sendSuggestion(this)">💡 Quais as conclusões?</div>
-          <div class="chat-suggestion" onclick="sendSuggestion(this)">📚 Crie um plano de estudo</div>
-          <div class="chat-suggestion" onclick="sendSuggestion(this)">⚖️ Quais os prós e contras?</div>
-        </div>
-        <div class="chat-input-area">
-          <textarea id="chatInput" class="chat-input" placeholder="Pergunte algo sobre o documento..." rows="1" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendChat();}"></textarea>
-          <button class="chat-send" id="chatSendBtn" onclick="sendChat()">Enviar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- FLASHCARDS -->
-    <div id="tab-flashcards" class="tab-content hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div class="section-title mb-0">Flashcards gerados por IA</div>
-        <button class="btn-ghost px-3 py-1.5 rounded-lg text-xs" onclick="generateFlashcards()">🔄 Gerar novos</button>
-      </div>
-      <div id="flashcardsLoading" class="hidden text-center py-12">
-        <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA está criando flashcards...</div>
-      </div>
-      <div id="flashcardsContainer">
-        <div class="flashcard-container" onclick="flipFlashcard()">
-          <div class="flashcard" id="flashcard">
-            <div class="flashcard-face flashcard-front">
-              <div class="flashcard-label">Pergunta</div>
-              <div class="flashcard-text" id="flashcardFront">Clique em "Gerar novos" para criar flashcards</div>
-            </div>
-            <div class="flashcard-face flashcard-back">
-              <div class="flashcard-label">Resposta</div>
-              <div class="flashcard-text" id="flashcardBack">—</div>
-            </div>
-          </div>
-        </div>
-        <div class="flashcard-counter" id="flashcardCounter">0 / 0</div>
-        <div class="flashcard-controls">
-          <button class="btn-ghost px-4 py-2 rounded-lg" onclick="prevFlashcard()">← Anterior</button>
-          <button class="btn-ghost px-4 py-2 rounded-lg" onclick="flipFlashcard()">🔄 Virar</button>
-          <button class="btn-ghost px-4 py-2 rounded-lg" onclick="nextFlashcard()">Próximo →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUIZ -->
-    <div id="tab-quiz" class="tab-content hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div class="section-title mb-0">Quiz gerado por IA</div>
-        <button class="btn-ghost px-3 py-1.5 rounded-lg text-xs" onclick="generateQuiz()">🔄 Gerar novo quiz</button>
-      </div>
-      <div id="quizLoading" class="hidden text-center py-12">
-        <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA está criando perguntas...</div>
-      </div>
-      <div id="quizContainer"></div>
-    </div>
-
-    <!-- MODES -->
-    <div id="tab-modes" class="tab-content hidden">
-      <div class="section-title">Explique como...</div>
-      <p class="text-sm text-slate-400 mb-4">Escolha um estilo e a IA reescreve o conteúdo nesse tom</p>
-      <div class="mode-grid mb-6" id="modeGrid">
-        <div class="mode-card" data-mode="crianca" onclick="selectMode('crianca')">
-          <div class="mode-icon">👶</div>
-          <div class="mode-name">Criança de 5 anos</div>
-          <div class="mode-desc">Bem simples</div>
-        </div>
-        <div class="mode-card" data-mode="teen" onclick="selectMode('teen')">
-          <div class="mode-icon">🧑‍🎓</div>
-          <div class="mode-name">Adolescente</div>
-          <div class="mode-desc">Descolado</div>
-        </div>
-        <div class="mode-card" data-mode="einstein" onclick="selectMode('einstein')">
-          <div class="mode-icon">🧠</div>
-          <div class="mode-name">Einstein</div>
-          <div class="mode-desc">Genial</div>
-        </div>
-        <div class="mode-card" data-mode="pirate" onclick="selectMode('pirate')">
-          <div class="mode-icon">🏴‍☠️</div>
-          <div class="mode-name">Pirata</div>
-          <div class="mode-desc">Arrr!</div>
-        </div>
-        <div class="mode-card" data-mode="meme" onclick="selectMode('meme')">
-          <div class="mode-icon">😂</div>
-          <div class="mode-name">Meme</div>
-          <div class="mode-desc">Engraçado</div>
-        </div>
-        <div class="mode-card" data-mode="formal" onclick="selectMode('formal')">
-          <div class="mode-icon">🎩</div>
-          <div class="mode-name">Formal</div>
-          <div class="mode-desc">Acadêmico</div>
-        </div>
-        <div class="mode-card" data-mode="twitter" onclick="selectMode('twitter')">
-          <div class="mode-icon">🐦</div>
-          <div class="mode-name">Twitter</div>
-          <div class="mode-desc">Thread</div>
-        </div>
-        <div class="mode-card" data-mode="poema" onclick="selectMode('poema')">
-          <div class="mode-icon">📜</div>
-          <div class="mode-name">Poema</div>
-          <div class="mode-desc">Versos</div>
-        </div>
-      </div>
-      <div id="modeOutput" class="hidden">
-        <div class="glass rounded-2xl p-6">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-sm font-semibold" id="modeOutputTitle">—</div>
-            <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="copyModeOutput()">📋 Copiar</button>
-          </div>
-          <div id="modeOutputContent" class="text-slate-200 leading-relaxed whitespace-pre-wrap"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MINDMAP -->
-    <div id="tab-mindmap" class="tab-content hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div class="section-title mb-0">Mapa mental</div>
-        <div class="flex gap-2">
-          <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="resetMindmap()">↻ Resetar</button>
-          <button class="btn-ghost px-3 py-1 rounded-lg text-xs" onclick="toggleMindmapLabels()">🏷️ Rótulos</button>
-        </div>
-      </div>
-      <div class="text-xs text-slate-400 mb-3">💡 Arraste os nós • Scroll para zoom</div>
-      <div class="relative rounded-2xl overflow-hidden" style="background: radial-gradient(circle at center, rgba(124,92,255,0.08), transparent 70%); height: 600px; border: 1px solid var(--border);">
-        <canvas id="mindmapCanvas" style="width:100%; height:100%; display:block;"></canvas>
-        <div id="mindmapTooltip" class="tooltip"></div>
-      </div>
-    </div>
-
-    <!-- CHARTS -->
-    <div id="tab-charts" class="tab-content hidden">
-      <div class="section-title">Visualizações</div>
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass rounded-2xl p-5">
-          <div class="text-sm font-medium mb-3">Top 10 palavras</div>
-          <canvas id="chartWords" height="260"></canvas>
-        </div>
-        <div class="glass rounded-2xl p-5">
-          <div class="text-sm font-medium mb-3">Distribuição por parágrafo</div>
-          <canvas id="chartParagraphs" height="260"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- KEYWORDS -->
-    <div id="tab-keywords" class="tab-content hidden">
-      <div class="section-title">Palavras-chave</div>
-      <div id="keywordCloud" class="p-6 rounded-2xl bg-white/5 border border-white/10 min-h-[300px] flex flex-wrap content-start gap-2"></div>
-    </div>
-
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section id="features" class="max-w-7xl mx-auto px-6 py-16">
-  <div class="text-center mb-10">
-    <h2 class="text-3xl font-bold mb-3">Recursos com IA Real</h2>
-    <p class="text-slate-400">Tudo gratuito via Puter.js — sem API keys, sem limites chatos</p>
-  </div>
-  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="glass rounded-2xl p-6">
-      <div class="text-4xl mb-3">💬</div>
-      <div class="font-semibold text-lg mb-2">Chat Inteligente</div>
-      <div class="text-sm text-slate-400">Converse com seu documento como se fosse um tutor particular.</div>
-    </div>
-    <div class="glass rounded-2xl p-6">
-      <div class="text-4xl mb-3">🎴</div>
-      <div class="font-semibold text-lg mb-2">Flashcards</div>
-      <div class="text-sm text-slate-400">IA gera perguntas e respostas automaticamente para você estudar.</div>
-    </div>
-    <div class="glass rounded-2xl p-6">
-      <div class="text-4xl mb-3">❓</div>
-      <div class="font-semibold text-lg mb-2">Quiz Automático</div>
-      <div class="text-sm text-slate-400">Teste seu conhecimento com perguntas geradas sob medida.</div>
-    </div>
-    <div class="glass rounded-2xl p-6">
-      <div class="text-4xl mb-3">🎭</div>
-      <div class="font-semibold text-lg mb-2">Modos Criativos</div>
-      <div class="text-sm text-slate-400">Explique como Einstein, pirata, criança ou em forma de poema.</div>
+    <div id="tab-keywords" class="hidden">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">Palavras-chave</div>
+      <div id="keywordCloud" class="p-6 rounded-2xl bg-white/5 min-h-[300px] flex flex-wrap gap-2"></div>
     </div>
   </div>
 </section>
-
-<footer class="border-t border-white/5 py-8 text-center text-sm text-slate-500">
-  <div>PDF Insight Pro © 2026 • IA gratuita via Puter.js • Feito com 💜</div>
-</footer>
 
 <script>
-// ====== PDF.js setup ======
+// ====== STATE ======
+let currentUser = null;
+let currentText = '';
+let aiAvailable = false;
+
+// ====== INIT ======
+console.log('🚀 Iniciando app...');
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// ====== STATE ======
-let currentText = '';
-let charts = {};
-let mindmapData = null;
-let mindmapShowLabels = true;
-let currentUser = null;
-let userProfile = 'estudante';
-let analysisHistory = [];
-let summaryLevel = 'medium';
-let currentMode = null;
-let chatHistory = [];
-let flashcards = [];
-let currentFlashcard = 0;
-let quizQuestions = [];
-let quizScore = 0;
-let quizAnswered = 0;
-
-// ====== PUTER.JS AI WRAPPER ======
-async function callAI(prompt, systemPrompt = null) {
+// Check AI
+async function checkAI() {
   try {
-    const messages = [];
-    if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
-    messages.push({ role: 'user', content: prompt });
-    
-    const response = await puter.ai.chat(messages, { model: 'gpt-4o-mini' });
-    
-    // Puter pode retornar string ou objeto
-    if (typeof response === 'string') return response;
-    if (response?.message?.content) return response.message.content;
-    if (response?.text) return response.text;
-    return String(response);
-  } catch (err) {
-    console.error('Erro IA:', err);
-    throw err;
+    if (typeof puter !== 'undefined' && puter.ai) {
+      await puter.ai.chat([{role:'user',content:'oi'}], {model:'gpt-4o-mini'});
+      aiAvailable = true;
+      document.getElementById('aiStatus').innerHTML = '✓ IA Online';
+      document.getElementById('aiStatus').style.color = '#34d399';
+      console.log('✓ IA disponível');
+    } else {
+      throw new Error('Puter não carregou');
+    }
+  } catch(err) {
+    aiAvailable = false;
+    document.getElementById('aiStatus').innerHTML = '⚠ IA Offline';
+    document.getElementById('aiStatus').style.color = '#fbbf24';
+    console.warn('⚠ IA offline:', err.message);
   }
+}
+checkAI();
+
+// ====== TOAST ======
+function showToast(msg, type='info') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = {success:'✓',error:'✕',info:'ℹ'}[type]||'ℹ';
+  document.getElementById('toastMsg').textContent = msg;
+  toast.className = `toast show ${type}`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-function getSystemPrompt() {
-  const profilePrompts = {
-    estudante: 'Você é um tutor paciente e didático. Use linguagem clara, exemplos práticos e analogias do cotidiano. Foque em ajudar o estudante a entender e memorizar.',
-    pesquisador: 'Você é um assistente de pesquisa acadêmica. Use linguagem técnica precisa, cite conceitos e metodologias. Foque em rigor e profundidade analítica.',
-    executivo: 'Você é um consultor estratégico. Seja direto, foque em insights acionáveis, ROI e implicações práticas. Use linguagem de negócios.'
-  };
-  return profilePrompts[userProfile] || profilePrompts.estudante;
+// ====== AUTH ======
+function openLogin() {
+  document.getElementById('loginModal').classList.add('show');
 }
-
-// ====== ACCOUNTS ======
-function getAccounts() { try { return JSON.parse(localStorage.getItem('pdfinsight_accounts') || '[]'); } catch(e) { return []; } }
-function saveAccounts(a) { localStorage.setItem('pdfinsight_accounts', JSON.stringify(a)); }
-function findAccount(email) { return getAccounts().find(a => a.email.toLowerCase() === email.toLowerCase()); }
-function createAccount(name, email, password, provider) {
-  const accounts = getAccounts();
-  if (findAccount(email)) return { ok: false, error: 'E-mail já cadastrado' };
-  const acc = { name: name.trim(), email: email.trim().toLowerCase(), password, provider: provider || 'email', profile: 'estudante', createdAt: new Date().toISOString() };
-  accounts.push(acc);
-  saveAccounts(accounts);
-  return { ok: true, account: acc };
+function closeLogin() {
+  document.getElementById('loginModal').classList.remove('show');
 }
-function authenticate(email, password) {
-  const acc = findAccount(email);
-  if (!acc) return { ok: false, error: 'Conta não encontrada' };
-  if (acc.password !== password) return { ok: false, error: 'Senha incorreta' };
-  return { ok: true, account: acc };
+function doLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const pwd = document.getElementById('loginPassword').value;
+  if (!email || !pwd) { showToast('Preencha todos os campos', 'error'); return; }
+  currentUser = { name: email.split('@')[0], email };
+  closeLogin();
+  showToast(`Bem-vindo, ${currentUser.name}! 🎉`, 'success');
 }
-function removeAccount(email) {
-  saveAccounts(getAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase()));
-  localStorage.removeItem('pdfinsight_history_' + email.toLowerCase());
-}
-function setSession(acc) {
-  currentUser = acc;
-  userProfile = acc.profile || 'estudante';
-  localStorage.setItem('pdfinsight_session', JSON.stringify(acc));
-  try { analysisHistory = JSON.parse(localStorage.getItem('pdfinsight_history_' + acc.email.toLowerCase()) || '[]'); } catch(e) { analysisHistory = []; }
-  updateAuthUI();
-  updateProfileUI();
-}
-function clearSession() { currentUser = null; localStorage.removeItem('pdfinsight_session'); updateAuthUI(); }
-
-// ====== AUTH UI ======
-function initAuth() {
-  const s = localStorage.getItem('pdfinsight_session');
-  if (s) { try { currentUser = JSON.parse(s); userProfile = currentUser.profile || 'estudante'; updateAuthUI(); updateProfileUI(); } catch(e) {} }
-}
-function openLoginModal(mode) {
-  $('loginModal').classList.add('show');
-  if (mode === 'switch') { switchAuthForm('login'); setTimeout(() => $('loginEmail').focus(), 300); }
-  else {
-    const accounts = getAccounts();
-    switchAuthForm(accounts.length > 0 ? 'login' : 'register');
-    renderSavedAccounts();
-  }
-}
-function closeLoginModal() {
-  $('loginModal').classList.remove('show');
-  ['loginEmail','loginPassword','regName','regEmail','regPassword'].forEach(id => { const el = $(id); if (el) { el.value = ''; el.classList.remove('error'); } });
-}
-function switchAuthForm(form) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.form === form));
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  $(form + 'Form').classList.add('active');
-  renderSavedAccounts();
-}
-function renderSavedAccounts() {
-  const accounts = getAccounts();
-  const container = $('savedAccounts');
-  const list = $('accountsList');
-  if (accounts.length === 0) { container.classList.add('hidden'); return; }
-  container.classList.remove('hidden');
-  list.innerHTML = accounts.map(acc => {
-    const initials = acc.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '?';
-    const isCurrent = currentUser && currentUser.email.toLowerCase() === acc.email.toLowerCase();
-    return `<div class="account-item ${isCurrent ? 'current' : ''}" onclick="quickLogin('${acc.email.replace(/'/g, "\\'")}')">
-      <div class="account-avatar">${initials}</div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-medium truncate">${escapeHtml(acc.name)} ${isCurrent ? '<span class="text-xs text-cyan-400">(ativo)</span>' : ''}</div>
-        <div class="text-xs text-slate-400 truncate">${escapeHtml(acc.email)}</div>
-      </div>
-      <div class="account-remove" onclick="event.stopPropagation(); confirmRemoveAccount('${acc.email.replace(/'/g, "\\'")}')">✕</div>
-    </div>`;
-  }).join('');
-}
-function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function quickLogin(email) {
-  const acc = findAccount(email);
-  if (!acc) return;
-  const pwd = prompt(`Senha de ${acc.email}:`);
-  if (pwd === null) return;
-  const r = authenticate(email, pwd);
-  if (r.ok) { setSession(r.account); closeLoginModal(); showToast(`Bem-vindo, ${r.account.name.split(' ')[0]}! 🎉`, 'success'); }
-  else showToast(r.error, 'error');
-}
-function confirmRemoveAccount(email) {
-  const acc = findAccount(email);
-  if (!acc) return;
-  if (confirm(`Remover ${acc.name}?`)) {
-    removeAccount(email);
-    if (currentUser && currentUser.email.toLowerCase() === email.toLowerCase()) clearSession();
-    renderSavedAccounts();
-    showToast('Conta removida', 'info');
-  }
-}
-function doLogin() {
-  const email = $('loginEmail').value.trim();
-  const pwd = $('loginPassword').value;
-  let valid = true;
-  if (!email || !email.includes('@')) { $('loginEmail').classList.add('error'); valid = false; } else $('loginEmail').classList.remove('error');
-  if (!pwd) { $('loginPassword').classList.add('error'); valid = false; } else $('loginPassword').classList.remove('error');
-  if (!valid) { showToast('Preencha todos os campos', 'error'); return; }
-  const r = authenticate(email, pwd);
-  if (r.ok) { setSession(r.account); closeLoginModal(); showToast(`Bem-vindo, ${r.account.name.split(' ')[0]}! 🎉`, 'success'); }
-  else { showToast(r.error, 'error'); $('loginPassword').classList.add('error'); }
-}
-function doRegister() {
-  const name = $('regName').value.trim();
-  const email = $('regEmail').value.trim();
-  const pwd = $('regPassword').value;
-  let valid = true;
-  if (!name || name.length < 2) { $('regName').classList.add('error'); valid = false; } else $('regName').classList.remove('error');
-  if (!email || !email.includes('@')) { $('regEmail').classList.add('error'); valid = false; } else $('regEmail').classList.remove('error');
-  if (!pwd || pwd.length < 4) { $('regPassword').classList.add('error'); valid = false; } else $('regPassword').classList.remove('error');
-  if (!valid) { showToast('Preencha corretamente', 'error'); return; }
-  const r = createAccount(name, email, pwd);
-  if (r.ok) { setSession(r.account); closeLoginModal(); showToast(`Conta criada! Bem-vindo, ${name.split(' ')[0]} 🎉`, 'success'); }
-  else { showToast(r.error, 'error'); $('regEmail').classList.add('error'); }
-}
-function socialLogin(provider) {
-  const email = `user_${Date.now()}@${provider.toLowerCase()}.com`;
-  const name = `Usuário ${provider}`;
-  const r = createAccount(name, email, 'social_' + provider, provider);
-  if (r.ok) { setSession(r.account); closeLoginModal(); showToast(`Conectado via ${provider} ✓`, 'success'); }
-}
-function guestLogin() {
-  let acc = findAccount('convidado@pdfinsight.app');
-  if (!acc) { const r = createAccount('Convidado', 'convidado@pdfinsight.app', 'guest'); if (r.ok) acc = r.account; }
-  if (acc) { setSession(acc); closeLoginModal(); showToast('Entrando como convidado 👋', 'info'); }
-}
-function logout() { clearSession(); toggleUserMenu(null, true); showToast('Você saiu', 'info'); }
-function updateAuthUI() {
-  if (currentUser) {
-    $('loginBtn').classList.add('hidden');
-    $('userArea').classList.remove('hidden');
-    $('userArea').classList.add('flex');
-    const initials = currentUser.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-    $('userAvatar').textContent = initials || '?';
-    $('userGreeting').textContent = `Olá, ${currentUser.name.split(' ')[0]}`;
-    $('menuUserName').textContent = currentUser.name;
-    $('menuUserEmail').textContent = currentUser.email;
-    const profileNames = { estudante: '🎓 Estudante', pesquisador: '🔬 Pesquisador', executivo: '💼 Executivo' };
-    $('menuUserProfile').textContent = profileNames[userProfile] || '🎓 Estudante';
-  } else {
-    $('loginBtn').classList.remove('hidden');
-    $('userArea').classList.add('hidden');
-    $('userArea').classList.remove('flex');
-  }
-}
-function toggleUserMenu(e, forceClose) {
-  const m = $('userMenu');
-  if (forceClose || m.classList.contains('show')) m.classList.remove('show');
-  else m.classList.add('show');
-  if (e) e.stopPropagation();
-}
-function showHistory() {
-  toggleUserMenu(null, true);
-  if (analysisHistory.length === 0) { showToast('Sem histórico ainda', 'info'); return; }
-  alert('📚 Histórico:\n\n' + analysisHistory.map(h => `• ${h.name} (${new Date(h.date).toLocaleDateString('pt-BR')})`).join('\n'));
-}
-function saveToHistory(name, stats) {
-  if (!currentUser) return;
-  analysisHistory.unshift({ name, date: new Date().toISOString(), stats });
-  analysisHistory = analysisHistory.slice(0, 20);
-  localStorage.setItem('pdfinsight_history_' + currentUser.email.toLowerCase(), JSON.stringify(analysisHistory));
-}
-
-// ====== PROFILE ======
-function setProfile(p) {
-  userProfile = p;
-  if (currentUser) {
-    currentUser.profile = p;
-    const accounts = getAccounts();
-    const idx = accounts.findIndex(a => a.email.toLowerCase() === currentUser.email.toLowerCase());
-    if (idx >= 0) { accounts[idx].profile = p; saveAccounts(accounts); }
-    localStorage.setItem('pdfinsight_session', JSON.stringify(currentUser));
-  }
-  updateProfileUI();
-  updateAuthUI();
-  const names = { estudante: 'Estudante', pesquisador: 'Pesquisador', executivo: 'Executivo' };
-  showToast(`Perfil: ${names[p]} ✓`, 'success');
-}
-function updateProfileUI() {
-  document.querySelectorAll('.profile-chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.profile === userProfile);
-  });
+function doRegister(e) {
+  e.preventDefault();
+  showToast('Conta criada! ✓', 'success');
+  closeLogin();
 }
 
 // ====== TEXT MODAL ======
 function openTextModal() {
-  if (!currentUser) { showToast('Faça login primeiro', 'info'); openLoginModal(); return; }
-  $('textModal').classList.add('show');
-  setTimeout(() => $('textInput').focus(), 300);
+  if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
+  document.getElementById('textModal').classList.add('show');
 }
-function closeTextModal() { $('textModal').classList.remove('show'); }
-function selectSummaryLevel(l) {
-  summaryLevel = l;
-  document.querySelectorAll('.level-option').forEach(o => o.classList.toggle('selected', o.dataset.level === l));
+function closeTextModal() {
+  document.getElementById('textModal').classList.remove('show');
 }
-function loadTextExample() {
-  $('textTitle').value = 'Mudanças Climáticas';
-  $('textInput').value = `Mudanças Climáticas e Aquecimento Global
-
-As mudanças climáticas representam um dos maiores desafios da humanidade no século XXI. O aquecimento global, causado principalmente pela emissão de gases de efeito estufa, tem provocado alterações significativas no clima do planeta.
-
-A queima de combustíveis fósseis, como petróleo, carvão e gás natural, é a principal fonte de emissões de dióxido de carbono (CO2). Essas emissões aumentaram drasticamente desde a Revolução Industrial, elevando a temperatura média global em cerca de 1°C acima dos níveis pré-industriais.
-
-Os efeitos das mudanças climáticas já são visíveis: derretimento das calotas polares, elevação do nível do mar, eventos climáticos extremos mais frequentes, secas prolongadas e perda de biodiversidade.
-
-Para combater as mudanças climáticas, é necessária uma transição para energias renováveis, como solar, eólica e hidrelétrica. Além disso, práticas de reflorestamento, eficiência energética e mudanças nos padrões de consumo são essenciais.
-
-O Acordo de Paris, firmado em 2015, estabeleceu a meta de limitar o aquecimento global a 1,5°C. Países signatários se comprometeram a reduzir suas emissões, mas os esforços atuais ainda são insuficientes.
-
-A ação individual também é importante: reduzir o consumo de carne, usar transporte público, economizar energia e apoiar empresas sustentáveis são atitudes que contribuem para a solução.
-
-O futuro do planeta depende das decisões tomadas hoje. Governos, empresas e cidadãos devem trabalhar juntos para construir um mundo mais sustentável.`;
-  updateTextCounter();
-}
-function updateTextCounter() {
-  const t = $('textInput').value;
-  $('textCounter').textContent = `${t.length.toLocaleString('pt-BR')} caracteres • ${t.trim() ? t.trim().split(/\s+/).length : 0} palavras`;
-}
-async function processText() {
-  const text = $('textInput').value.trim();
-  const title = $('textTitle').value.trim() || 'Texto colado';
+function processText() {
+  const text = document.getElementById('textInput').value.trim();
+  const title = document.getElementById('textTitle').value.trim() || 'Texto colado';
   if (text.length < 100) { showToast('Texto muito curto (mín. 100 caracteres)', 'error'); return; }
-  $('fileName').textContent = title;
-  $('fileSize').textContent = `${(text.length / 1024).toFixed(2)} KB • ${text.split(/\s+/).length} palavras`;
-  $('fileIcon').textContent = '📝';
-  $('fileInfo').classList.remove('hidden');
-  $('dropZone').classList.add('hidden');
   closeTextModal();
-  $('processing').classList.remove('hidden');
-  $('dashboard').classList.add('hidden');
-  setProgress(20, 'Analisando com IA...');
-  setTimeout(() => {
-    const wc = text.split(/\s+/).length;
-    const pages = Math.max(1, Math.ceil(wc / 300));
-    analyzeText(text, pages, true);
-  }, 500);
+  document.getElementById('fileName').textContent = title;
+  document.getElementById('fileSize').textContent = `${text.split(/\s+/).length} palavras`;
+  document.getElementById('fileInfo').classList.remove('hidden');
+  document.getElementById('dropZone').classList.add('hidden');
+  analyzeText(text, Math.ceil(text.split(/\s+/).length / 300));
 }
 
-// ====== TOAST ======
-let toastTimer;
-function showToast(msg, type = 'info') {
-  const t = $('toast');
-  $('toastIcon').textContent = { success: '✓', error: '✕', info: 'ℹ' }[type] || 'ℹ';
-  $('toastMsg').textContent = msg;
-  t.className = `toast ${type} show`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-document.addEventListener('click', e => { if (!$('authArea').contains(e.target)) $('userMenu').classList.remove('show'); });
-$('loginModal').addEventListener('click', e => { if (e.target === $('loginModal')) closeLoginModal(); });
-$('textModal').addEventListener('click', e => { if (e.target === $('textModal')) closeTextModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLoginModal(); closeTextModal(); } });
-$('textInput').addEventListener('input', updateTextCounter);
-
-// ====== HELPERS ======
-function hexToRgba(hex, alpha) {
-  let h = hex.replace('#', '');
-  if (h.length === 3) h = h.split('').map(c => c + c).join('');
-  if (h.length === 8) h = h.slice(0, 6);
-  if (h.length !== 6) return `rgba(124,92,255,${alpha})`;
-  return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${alpha})`;
-}
-const $ = id => document.getElementById(id);
-const dropZone = $('dropZone');
-const fileInput = $('fileInput');
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('drag');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type === 'application/pdf') handleFile(f);
-});
-fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
-
-function handleFile(file) {
-  if (!currentUser) { showToast('Faça login', 'info'); openLoginModal(); return; }
+// ====== FILE HANDLING ======
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
   if (file.size > 20 * 1024 * 1024) { showToast('Arquivo muito grande (máx 20MB)', 'error'); return; }
-  $('fileName').textContent = file.name;
-  $('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-  $('fileIcon').textContent = '📄';
-  $('fileInfo').classList.remove('hidden');
-  $('dropZone').classList.add('hidden');
+  
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+  document.getElementById('fileInfo').classList.remove('hidden');
+  document.getElementById('dropZone').classList.add('hidden');
+  
   processPDF(file);
 }
 
 function resetFile() {
   currentText = '';
-  $('fileInfo').classList.add('hidden');
-  $('dropZone').classList.remove('hidden');
-  $('dashboard').classList.add('hidden');
-  $('processing').classList.add('hidden');
-  fileInput.value = '';
-  $('textInput').value = '';
-  $('textTitle').value = '';
-  updateTextCounter();
-  chatHistory = [];
-  flashcards = [];
-  quizQuestions = [];
-  $('chatMessages').innerHTML = '<div class="chat-msg ai"><div class="chat-avatar">🤖</div><div class="chat-bubble">Olá! Li seu documento e estou pronto para ajudar. 😊</div></div>';
+  document.getElementById('fileInfo').classList.add('hidden');
+  document.getElementById('dropZone').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('processing').classList.add('hidden');
+  document.getElementById('fileInput').value = '';
 }
 
 function loadDemo() {
-  if (!currentUser) { showToast('Faça login', 'info'); openLoginModal(); return; }
+  if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
   const demoText = `Inteligência Artificial e Aprendizado de Máquina
 
-A inteligência artificial (IA) é um campo da ciência da computação dedicado à criação de sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana. Essas tarefas incluem reconhecimento de voz, tomada de decisões, tradução de idiomas e percepção visual.
+A inteligência artificial (IA) é um campo da ciência da computação dedicado à criação de sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana.
 
-O aprendizado de máquina (machine learning) é um subconjunto da IA que permite que os sistemas aprendam e melhorem automaticamente a partir da experiência, sem serem explicitamente programados.
+O aprendizado de máquina é um subconjunto da IA que permite que os sistemas aprendam automaticamente a partir da experiência.
 
-Existem três tipos principais de aprendizado de máquina: aprendizado supervisionado, aprendizado não supervisionado e aprendizado por reforço. No aprendizado supervisionado, o algoritmo é treinado em um conjunto de dados rotulados. No aprendizado não supervisionado, o algoritmo encontra padrões em dados não rotulados. No aprendizado por reforço, o algoritmo aprende através de tentativa e erro.
+Existem três tipos principais: aprendizado supervisionado, não supervisionado e por reforço.
 
-As redes neurais artificiais são inspiradas no cérebro humano e consistem em camadas de nós interconectados. As redes neurais profundas (deep learning) possuem muitas camadas e são capazes de aprender representações complexas.
+As redes neurais artificiais são inspiradas no cérebro humano e consistem em camadas de nós interconectados.
 
-A IA tem aplicações em diversas áreas: medicina, finanças, transporte, educação, entretenimento. Na medicina, a IA pode ajudar no diagnóstico de doenças. Nas finanças, pode detectar fraudes. No transporte, pode permitir veículos autônomos.
+A IA tem aplicações em medicina, finanças, transporte, educação e muito mais.
 
-Os desafios da IA incluem questões éticas, privacidade de dados, viés algorítmico e o impacto no mercado de trabalho. É importante desenvolver a IA de forma responsável e transparente.
-
-O futuro da IA promete avanços significativos em processamento de linguagem natural, visão computacional e robótica.`;
-  $('fileName').textContent = 'demo_inteligencia_artificial.pdf';
-  $('fileSize').textContent = 'demo';
-  $('fileIcon').textContent = '📄';
-  $('fileInfo').classList.remove('hidden');
-  $('dropZone').classList.add('hidden');
+Os desafios incluem questões éticas, privacidade e impacto no mercado de trabalho.`;
+  document.getElementById('fileName').textContent = 'demo_ia.pdf';
+  document.getElementById('fileSize').textContent = 'demo';
+  document.getElementById('fileInfo').classList.remove('hidden');
+  document.getElementById('dropZone').classList.add('hidden');
   analyzeText(demoText, 8);
 }
 
 async function processPDF(file) {
-  $('processing').classList.remove('hidden');
-  $('dashboard').classList.add('hidden');
-  setProgress(10, 'Lendo arquivo...');
+  document.getElementById('processing').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('processingStatus').textContent = 'Lendo arquivo...';
+  
   try {
     const ab = await file.arrayBuffer();
-    setProgress(30, 'Carregando PDF...');
+    document.getElementById('processingStatus').textContent = 'Carregando PDF...';
     const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-    setProgress(50, `Extraindo ${pdf.numPages} páginas...`);
+    document.getElementById('processingStatus').textContent = `Extraindo ${pdf.numPages} páginas...`;
+    
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       fullText += content.items.map(item => item.str).join(' ') + '\n\n';
-      setProgress(50 + (i / pdf.numPages) * 30, `Página ${i}/${pdf.numPages}`);
+      document.getElementById('processingStatus').textContent = `Página ${i}/${pdf.numPages}`;
     }
-    setProgress(85, 'Analisando com IA...');
-    await new Promise(r => setTimeout(r, 300));
+    
     analyzeText(fullText, pdf.numPages);
-    setProgress(100, 'Concluído!');
   } catch (err) {
     console.error(err);
     showToast('Erro: ' + err.message, 'error');
     resetFile();
   }
 }
-function setProgress(p, m) { $('progressBar').style.width = p + '%'; $('processingStatus').textContent = m; }
 
-// ====== TEXT ANALYSIS ======
-async function analyzeText(text, numPages, isPastedText = false) {
+// ====== ANALYSIS ======
+async function analyzeText(text, numPages) {
   currentText = text;
-  const cleanText = text.replace(/\s+/g, ' ').trim();
-  const words = cleanText.split(/\s+/).filter(w => w.length > 0);
+  const words = text.split(/\s+/).filter(w => w.length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 10);
   const wordCount = words.length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  $('statPages').textContent = numPages;
-  $('statWords').textContent = wordCount.toLocaleString('pt-BR');
-  $('statParagraphs').textContent = paragraphs.length;
-  $('statTime').textContent = readingTime + 'm';
-  const src = isPastedText ? 'Texto colado' : 'PDF';
-  $('docTitle').textContent = `${src} • ${wordCount.toLocaleString('pt-BR')} palavras • ~${readingTime} min`;
+  document.getElementById('statPages').textContent = numPages;
+  document.getElementById('statWords').textContent = wordCount.toLocaleString('pt-BR');
+  document.getElementById('statParagraphs').textContent = paragraphs.length;
+  document.getElementById('statTime').textContent = readingTime + 'm';
+  document.getElementById('docTitle').textContent = `${wordCount.toLocaleString('pt-BR')} palavras • ~${readingTime} min`;
 
-  // Análise local (rápida)
-  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','nos','nas','ao','aos','as','os','é','são','foi','ser','estar','ter','haver','fazer','dizer','poder','ir','ver','dar','saber','querer','ficar','deve','devem','pode','podem','mais','menos','muito','muitos','muitas','pouco','poucos','também','não','sim','mas','ou','se','quando','como','onde','porque','isso','isto','esse','essa','esta','este','seu','sua','seus','suas','meu','minha','meus','minhas','nosso','nossa','lhe','lhes','me','te','nos','vos','qual','quais','quem','cujo','cuja','todo','toda','todos','todas','outro','outra','outros','outras','mesmo','mesma','cada','the','and','of','to','in','is','it','for','that','with','on','are','as','be','this','have','from','or','an','by','at','not','but','what','all','were','we','when','your','can','there','use','each','which','she','do','how','their','if','will','up','other','about','out','many','then','them','these','so','some','her','would','make','like','into','him','has','two','more','go','no','way','could','my','than','first','been','its','who','now','may','down','show','any','such','only','his','one','also','over','after','being','between','both','under','where']);
+  // Keywords
+  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','os','as','ao','é','são','foi','ser','ter','mais','não','mas','ou','se','quando','como','isso','isto','esse','essa','este','seu','sua','meu','minha','nosso','nossa']);
   const freq = {};
   words.forEach(w => {
-    const lw = w.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç0-9]/g, '');
+    const lw = w.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç]/g, '');
     if (lw.length > 3 && !stopWords.has(lw)) freq[lw] = (freq[lw] || 0) + 1;
   });
   const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 15);
-  const paraStats = paragraphs.map((p, i) => ({
-    idx: i+1,
-    words: p.split(/\s+/).filter(w => w).length,
-    sentences: p.split(/[.!?]+/).filter(s => s.trim().length > 5).length
-  }));
 
-  // Renderizar análises locais
-  renderCharts(topWords, paraStats);
-  renderKeywords(topWords);
-  renderMindmap(topWords, paragraphs);
+  // Render keywords
+  const cloud = document.getElementById('keywordCloud');
+  const maxFreq = topWords[0]?.[1] || 1;
+  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24'];
+  cloud.innerHTML = topWords.map((w, i) => {
+    const size = 14 + (w[1] / maxFreq) * 20;
+    const color = colors[i % colors.length];
+    return `<span style="font-size:${size}px; padding:4px 10px; border-radius:999px; background:${color}22; color:${color}; border:1px solid ${color}55; margin:3px; display:inline-block">${w[0]} (${w[1]})</span>`;
+  }).join('');
 
-  // Resetar estados
-  chatHistory = [];
-  $('chatMessages').innerHTML = '<div class="chat-msg ai"><div class="chat-avatar">🤖</div><div class="chat-bubble">Li seu documento! Pode me perguntar qualquer coisa sobre o conteúdo. 😊</div></div>';
-  flashcards = [];
-  quizQuestions = [];
-  currentFlashcard = 0;
-  $('flashcardFront').textContent = 'Clique em "Gerar novos" para criar flashcards';
-  $('flashcardBack').textContent = '—';
-  $('flashcardCounter').textContent = '0 / 0';
-  $('quizContainer').innerHTML = '<div class="text-center py-8 text-slate-400">Clique em "Gerar novo quiz" para começar</div>';
-  $('modeOutput').classList.add('hidden');
-  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-  currentMode = null;
+  // AI Summary
+  await generateSummary(text);
 
-  // Resumo com IA
-  await generateAISummary(text);
-
-  saveToHistory($('fileName').textContent, { pages: numPages, words: wordCount });
-  $('processing').classList.add('hidden');
-  $('dashboard').classList.remove('hidden');
-  $('dashboard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('processing').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
   showToast('Análise concluída! 🎉', 'success');
 }
 
-async function generateAISummary(text) {
-  $('summaryLoading').classList.remove('hidden');
-  $('summaryContent').innerHTML = '';
-  $('mainIdea').textContent = '';
+async function generateSummary(text) {
+  const container = document.getElementById('summaryContent');
+  container.innerHTML = '<div class="text-slate-400">Gerando resumo com IA...</div>';
 
-  const count = summaryLevel === 'short' ? 3 : summaryLevel === 'detailed' ? 10 : 6;
-  const truncated = text.slice(0, 8000);
-  
-  const prompt = `Analise o texto abaixo e retorne APENAS um JSON válido (sem markdown, sem \`\`\`) com esta estrutura exata:
-{
-  "summary": ["ponto 1", "ponto 2", ...],
-  "mainIdea": "ideia central em 1-2 frases"
-}
-
-O array "summary" deve ter EXATAMENTE ${count} pontos principais, cada um com 1-2 frases claras e objetivas.
-"mainIdea" deve ser a ideia central do texto em 1-2 frases.
-
-TEXTO:
-${truncated}`;
-
-  try {
-    const response = await callAI(prompt, getSystemPrompt());
-    const parsed = parseJSON(response);
-    
-    if (parsed && parsed.summary && Array.isArray(parsed.summary)) {
-      $('summaryContent').innerHTML = parsed.summary.map((s, i) => `
-        <div class="summary-bullet fade-in" style="animation-delay:${i*0.1}s">
-          <div class="flex gap-3">
-            <div class="text-xs font-bold text-purple-400 mt-1">${String(i+1).padStart(2,'0')}</div>
-            <div class="text-slate-200 leading-relaxed">${escapeHtml(s)}</div>
-          </div>
-        </div>
-      `).join('');
-      $('mainIdea').textContent = parsed.mainIdea || '';
-    } else {
-      throw new Error('Resposta inválida');
-    }
-  } catch (err) {
-    console.error('Erro resumo:', err);
-    // Fallback: resumo local
-    fallbackSummary(text, count);
-  }
-  $('summaryLoading').classList.add('hidden');
-}
-
-function parseJSON(text) {
-  try {
-    // Tentar extrair JSON de dentro da resposta
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]);
-  } catch(e) {}
-  return null;
-}
-
-function fallbackSummary(text, count) {
-  const sentences = text.replace(/\s+/g, ' ').split(/[.!?]+/).filter(s => s.trim().length > 20);
-  const picked = sentences.slice(0, count).map(s => s.trim());
-  $('summaryContent').innerHTML = picked.map((s, i) => `
-    <div class="summary-bullet fade-in">
-      <div class="flex gap-3">
-        <div class="text-xs font-bold text-purple-400 mt-1">${String(i+1).padStart(2,'0')}</div>
-        <div class="text-slate-200 leading-relaxed">${escapeHtml(s)} <span class="text-xs text-slate-500">(fallback local)</span></div>
+  if (!aiAvailable) {
+    // Fallback local
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+    const picked = sentences.slice(0, 5);
+    container.innerHTML = picked.map((s, i) => `
+      <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
+        <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
+        <div class="text-slate-200">${s.trim()}</div>
       </div>
-    </div>
-  `).join('');
-  $('mainIdea').textContent = sentences[0]?.trim() || '';
-}
+    `).join('');
+    return;
+  }
 
-async function regenerateSummary() {
-  if (!currentText) return;
-  await generateAISummary(currentText);
-  showToast('Resumo regenerado! ✨', 'success');
+  try {
+    const prompt = `Resuma o texto em 5 pontos principais. Responda APENAS com JSON: {"summary":["ponto1","ponto2",...]}\n\nTexto:\n${text.slice(0, 5000)}`;
+    const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
+    const text = typeof response === 'string' ? response : response?.message?.content || String(response);
+    
+    // Parse JSON
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      if (parsed.summary) {
+        container.innerHTML = parsed.summary.map((s, i) => `
+          <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
+            <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
+            <div class="text-slate-200">${s}</div>
+          </div>
+        `).join('');
+        return;
+      }
+    }
+    throw new Error('Formato inválido');
+  } catch(err) {
+    console.error('Erro IA:', err);
+    // Fallback
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+    container.innerHTML = sentences.slice(0, 5).map((s, i) => `
+      <div class="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500">
+        <div class="text-xs text-purple-400 mb-1">${i+1}.</div>
+        <div class="text-slate-200">${s.trim()}</div>
+      </div>
+    `).join('');
+  }
 }
 
 // ====== CHAT ======
 async function sendChat() {
-  const input = $('chatInput');
+  const input = document.getElementById('chatInput');
   const msg = input.value.trim();
-  if (!msg || !currentText) return;
+  if (!msg) return;
+  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
+  if (!aiAvailable) { showToast('IA offline', 'error'); return; }
+  
   input.value = '';
-  addChatMessage('user', msg);
-  chatHistory.push({ role: 'user', content: msg });
-
-  // Typing indicator
-  const typingId = 'typing-' + Date.now();
-  const typingHtml = `<div class="chat-msg ai" id="${typingId}"><div class="chat-avatar">🤖</div><div class="chat-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
-  $('chatMessages').insertAdjacentHTML('beforeend', typingHtml);
-  scrollChat();
-  $('chatSendBtn').disabled = true;
-
-  const truncated = currentText.slice(0, 6000);
-  const systemPrompt = `${getSystemPrompt()}
-
-Você é um assistente que já leu o documento do usuário. Responda APENAS com base no conteúdo do documento. Se a pergunta não puder ser respondida com o documento, diga isso claramente. Seja conciso mas completo.
-
-CONTEÚDO DO DOCUMENTO:
-${truncated}`;
+  const chatDiv = document.getElementById('chatMessages');
+  chatDiv.innerHTML += `<div class="mb-3"><div class="text-xs text-slate-400 mb-1">Você:</div><div class="bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-3">${msg}</div></div>`;
+  chatDiv.innerHTML += `<div class="mb-3"><div class="text-xs text-slate-400 mb-1">IA:</div><div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">Pensando...</div></div>`;
+  chatDiv.scrollTop = chatDiv.scrollHeight;
 
   try {
-    const messages = [{ role: 'system', content: systemPrompt }];
-    // Incluir histórico (últimas 6 mensagens)
-    chatHistory.slice(-6).forEach(m => messages.push(m));
+    const prompt = `Baseado neste texto, responda: ${msg}\n\nTexto:\n${currentText.slice(0, 4000)}`;
+    const response = await puter.ai.chat([{role:'user',content:prompt}], {model:'gpt-4o-mini'});
+    const answer = typeof response === 'string' ? response : response?.message?.content || String(response);
     
-    const response = await puter.ai.chat(messages, { model: 'gpt-4o-mini' });
-    const text = typeof response === 'string' ? response : (response?.message?.content || response?.text || String(response));
-    
-    document.getElementById(typingId)?.remove();
-    addChatMessage('ai', text);
-    chatHistory.push({ role: 'assistant', content: text });
-  } catch (err) {
-    document.getElementById(typingId)?.remove();
-    addChatMessage('ai', '❌ Erro ao processar: ' + err.message);
-  }
-  $('chatSendBtn').disabled = false;
-}
-
-function addChatMessage(role, text) {
-  const avatar = role === 'ai' ? '🤖' : '👤';
-  const html = `<div class="chat-msg ${role}"><div class="chat-avatar">${avatar}</div><div class="chat-bubble">${escapeHtml(text)}</div></div>`;
-  $('chatMessages').insertAdjacentHTML('beforeend', html);
-  scrollChat();
-}
-
-function scrollChat() {
-  const c = $('chatMessages');
-  c.scrollTop = c.scrollHeight;
-}
-
-function sendSuggestion(el) {
-  const text = el.textContent.replace(/^[^\s]+\s/, ''); // remove emoji
-  $('chatInput').value = text;
-  sendChat();
-}
-
-// ====== FLASHCARDS ======
-async function generateFlashcards() {
-  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
-  $('flashcardsLoading').classList.remove('hidden');
-  
-  const truncated = currentText.slice(0, 6000);
-  const prompt = `Baseado no texto abaixo, gere EXATAMENTE 8 flashcards de estudo em formato JSON.
-Retorne APENAS um JSON válido (sem markdown) com esta estrutura:
-[
-  {"question": "pergunta clara e objetiva", "answer": "resposta completa mas concisa"},
-  ...
-]
-
-As perguntas devem testar compreensão, não apenas memorização. Varie os tipos (conceitos, relações, aplicações).
-
-TEXTO:
-${truncated}`;
-
-  try {
-    const response = await callAI(prompt, getSystemPrompt());
-    const parsed = parseJSON(response);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      flashcards = parsed;
-      currentFlashcard = 0;
-      updateFlashcard();
-      showToast(`${flashcards.length} flashcards criados! 🎴`, 'success');
-    } else throw new Error('Formato inválido');
-  } catch (err) {
-    console.error(err);
-    showToast('Erro ao gerar flashcards', 'error');
-  }
-  $('flashcardsLoading').classList.add('hidden');
-}
-
-function updateFlashcard() {
-  if (flashcards.length === 0) return;
-  const fc = flashcards[currentFlashcard];
-  $('flashcardFront').textContent = fc.question;
-  $('flashcardBack').textContent = fc.answer;
-  $('flashcardCounter').textContent = `${currentFlashcard + 1} / ${flashcards.length}`;
-  $('flashcard').classList.remove('flipped');
-}
-
-function flipFlashcard() { $('flashcard').classList.toggle('flipped'); }
-function nextFlashcard() {
-  if (flashcards.length === 0) return;
-  currentFlashcard = (currentFlashcard + 1) % flashcards.length;
-  updateFlashcard();
-}
-function prevFlashcard() {
-  if (flashcards.length === 0) return;
-  currentFlashcard = (currentFlashcard - 1 + flashcards.length) % flashcards.length;
-  updateFlashcard();
-}
-
-// ====== QUIZ ======
-async function generateQuiz() {
-  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
-  $('quizLoading').classList.remove('hidden');
-  $('quizContainer').innerHTML = '';
-  
-  const truncated = currentText.slice(0, 6000);
-  const prompt = `Baseado no texto, gere EXATAMENTE 5 perguntas de múltipla escolha em formato JSON.
-Retorne APENAS um JSON válido (sem markdown) com esta estrutura:
-[
-  {
-    "question": "pergunta",
-    "options": ["opção A", "opção B", "opção C", "opção D"],
-    "correct": 0,
-    "explanation": "explicação curta da resposta correta"
-  },
-  ...
-]
-
-"correct" é o índice (0-3) da opção correta. Varie a posição da correta.
-
-TEXTO:
-${truncated}`;
-
-  try {
-    const response = await callAI(prompt, getSystemPrompt());
-    const parsed = parseJSON(response);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      quizQuestions = parsed;
-      quizScore = 0;
-      quizAnswered = 0;
-      renderQuiz();
-      showToast(`${quizQuestions.length} perguntas geradas! ❓`, 'success');
-    } else throw new Error('Formato inválido');
-  } catch (err) {
-    console.error(err);
-    showToast('Erro ao gerar quiz', 'error');
-    $('quizContainer').innerHTML = '<div class="text-center py-8 text-slate-400">Erro ao gerar quiz. Tente novamente.</div>';
-  }
-  $('quizLoading').classList.add('hidden');
-}
-
-function renderQuiz() {
-  const c = $('quizContainer');
-  c.innerHTML = quizQuestions.map((q, qi) => `
-    <div class="quiz-question" id="quiz-q-${qi}">
-      <div class="quiz-question-text"><strong>${qi+1}.</strong> ${escapeHtml(q.question)}</div>
-      ${q.options.map((opt, oi) => `
-        <div class="quiz-option" data-q="${qi}" data-o="${oi}" onclick="answerQuiz(${qi}, ${oi})">
-          ${String.fromCharCode(65+oi)}) ${escapeHtml(opt)}
-        </div>
-      `).join('')}
-      <div class="hidden mt-3 text-sm p-3 rounded-lg" id="quiz-exp-${qi}"></div>
-    </div>
-  `).join('');
-}
-
-function answerQuiz(qi, oi) {
-  const q = quizQuestions[qi];
-  const options = document.querySelectorAll(`[data-q="${qi}"]`);
-  if (options[0].classList.contains('disabled')) return;
-  
-  options.forEach((opt, idx) => {
-    opt.classList.add('disabled');
-    if (idx === q.correct) opt.classList.add('correct');
-    else if (idx === oi) opt.classList.add('wrong');
-  });
-  
-  const exp = $(`quiz-exp-${qi}`);
-  exp.classList.remove('hidden');
-  if (oi === q.correct) {
-    quizScore++;
-    exp.className = 'mt-3 text-sm p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-300';
-    exp.innerHTML = `✅ Correto! ${escapeHtml(q.explanation || '')}`;
-  } else {
-    exp.className = 'mt-3 text-sm p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300';
-    exp.innerHTML = `❌ Incorreto. ${escapeHtml(q.explanation || '')}`;
-  }
-  
-  quizAnswered++;
-  if (quizAnswered === quizQuestions.length) {
-    const pct = Math.round((quizScore / quizQuestions.length) * 100);
-    const msg = pct >= 80 ? '🏆 Excelente!' : pct >= 60 ? '👍 Bom trabalho!' : '📚 Continue estudando!';
-    setTimeout(() => {
-      const score = document.createElement('div');
-      score.className = 'quiz-score mt-6 fade-in';
-      score.innerHTML = `
-        <div class="text-sm text-slate-400 mb-2">${msg}</div>
-        <div class="quiz-score-number">${quizScore}/${quizQuestions.length}</div>
-        <div class="text-slate-400 mt-2">${pct}% de acerto</div>
-      `;
-      $('quizContainer').appendChild(score);
-    }, 500);
+    const messages = chatDiv.querySelectorAll('div.mb-3');
+    const lastMsg = messages[messages.length - 1];
+    lastMsg.querySelector('div.bg-purple-500\\/10').textContent = answer;
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  } catch(err) {
+    const messages = chatDiv.querySelectorAll('div.mb-3');
+    const lastMsg = messages[messages.length - 1];
+    lastMsg.querySelector('div.bg-purple-500\\/10').textContent = '❌ Erro: ' + err.message;
   }
 }
-
-// ====== MODES ======
-const modePrompts = {
-  crianca: { name: '👶 Criança de 5 anos', instruction: 'Explique o conteúdo como se fosse para uma criança de 5 anos. Use palavras bem simples, analogias com brinquedos, animais e coisas do dia a dia. Seja lúdico e divertido.' },
-  teen: { name: '🧑‍🎓 Adolescente', instruction: 'Explique o conteúdo como se fosse para um adolescente. Use linguagem descolada, referências a redes sociais, games e cultura pop. Seja direto e interessante.' },
-  einstein: { name: '🧠 Einstein', instruction: 'Explique o conteúdo como Albert Einstein faria. Use analogias brilhantes, insights profundos e linguagem inspiradora. Seja genial mas acessível.' },
-  pirate: { name: '🏴‍☠️ Pirata', instruction: 'Explique o conteúdo como um pirata falaria. Use "arr", "marujo", "tesouro", "navegar" e outras expressões piratas. Seja teatral e engraçado.' },
-  meme: { name: '😂 Meme', instruction: 'Explique o conteúdo em formato de memes e piadas da internet. Use referências a memes populares, emojis e humor. Seja engraçado mas informativo.' },
-  formal: { name: '🎩 Formal/Acadêmico', instruction: 'Reescreva o conteúdo em linguagem acadêmica formal, como um paper científico. Use terminologia técnica, estrutura lógica e tom erudito.' },
-  twitter: { name: '🐦 Twitter Thread', instruction: 'Transforme o conteúdo em uma thread do Twitter/X. Use emojis, frases curtas e impactantes, numeradas (1/, 2/, etc). Seja viral e informativo.' },
-  poema: { name: '📜 Poema', instruction: 'Transforme o conteúdo em um poema com rimas. Capture as ideias principais de forma poética e artística.' }
-};
-
-async function selectMode(mode) {
-  if (!currentText) { showToast('Analise um documento primeiro', 'error'); return; }
-  currentMode = mode;
-  document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === mode));
-  
-  $('modeOutput').classList.remove('hidden');
-  $('modeOutputTitle').textContent = modePrompts[mode].name;
-  $('modeOutputContent').innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  
-  const truncated = currentText.slice(0, 5000);
-  const prompt = `${modePrompts[mode].instruction}
-
-CONTEÚDO PARA REESCREVER:
-${truncated}
-
-Responda APENAS com o conteúdo reescrito no estilo solicitado. Não inclua explicações sobre o que você fez.`;
-
-  try {
-    const response = await callAI(prompt);
-    $('modeOutputContent').textContent = response;
-  } catch (err) {
-    $('modeOutputContent').textContent = '❌ Erro: ' + err.message;
-  }
-}
-
-function copyModeOutput() {
-  const text = $('modeOutputContent').textContent;
-  navigator.clipboard.writeText(text).then(() => showToast('Copiado! 📋', 'success'));
-}
-
-// ====== CHARTS ======
-function renderCharts(topWords, paraStats) {
-  Object.values(charts).forEach(c => c.destroy());
-  charts = {};
-  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc','#2dd4bf'];
-  charts.words = new Chart($('chartWords'), {
-    type: 'bar',
-    data: {
-      labels: topWords.slice(0,10).map(w => w[0]),
-      datasets: [{ label: 'Freq', data: topWords.slice(0,10).map(w => w[1]), backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 2, borderRadius: 8 }]
-    },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0b4' } }, x: { grid: { display: false }, ticks: { color: '#9aa0b4' } } } }
-  });
-  charts.paragraphs = new Chart($('chartParagraphs'), {
-    type: 'line',
-    data: {
-      labels: paraStats.map(p => `P${p.idx}`),
-      datasets: [{ label: 'Palavras', data: paraStats.map(p => p.words), borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.1)', fill: true, tension: 0.4 }]
-    },
-    options: { responsive: true, plugins: { legend: { labels: { color: '#e6e8ef' } } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0b4' } }, x: { grid: { display: false }, ticks: { color: '#9aa0b4' } } } }
-  });
-}
-
-function renderKeywords(topWords) {
-  const cloud = $('keywordCloud');
-  const maxFreq = topWords[0]?.[1] || 1;
-  const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24'];
-  cloud.innerHTML = topWords.map((w, i) => {
-    const size = 14 + (w[1] / maxFreq) * 28;
-    const color = colors[i % colors.length];
-    return `<span class="tag" style="font-size:${size}px; background:${color}22; color:${color}; border-color:${color}55">${w[0]} <span style="opacity:0.6; font-size:0.8em">(${w[1]})</span></span>`;
-  }).join('');
-}
-
-// ====== MINDMAP ======
-function renderMindmap(topWords, paragraphs) {
-  const canvas = $('mindmapCanvas');
-  const container = canvas.parentElement;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = container.clientWidth * dpr;
-  canvas.height = container.clientHeight * dpr;
-  canvas.style.width = container.clientWidth + 'px';
-  canvas.style.height = container.clientHeight + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  const W = container.clientWidth, H = container.clientHeight;
-  const nodes = [];
-  const center = { id: 'root', label: 'Documento', x: W/2, y: H/2, r: 50, color: '#7c5cff', parent: null, level: 0, tooltip: 'Tema central' };
-  nodes.push(center);
-  const topicColors = ['#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc'];
-  const topics = paragraphs.slice(0, 6).map((p, i) => ({
-    name: p.split(/[.!?]/)[0].trim().slice(0, 40) || `Tópico ${i+1}`,
-    keywords: topWords.slice(i*2, i*2+3).map(w => w[0])
-  }));
-  topics.forEach((t, i) => {
-    const angle = (i / topics.length) * Math.PI * 2 - Math.PI/2;
-    const dist = 180;
-    const topicNode = { id: 't'+i, label: t.name, x: W/2 + Math.cos(angle)*dist, y: H/2 + Math.sin(angle)*dist, r: 35, color: topicColors[i % topicColors.length], parent: center, level: 1, tooltip: t.name };
-    nodes.push(topicNode);
-    t.keywords.forEach((kw, j) => {
-      const sa = angle + (j-1)*0.4;
-      const sd = dist + 110;
-      nodes.push({ id: `k${i}-${j}`, label: kw, x: W/2 + Math.cos(sa)*sd, y: H/2 + Math.sin(sa)*sd, r: 22, color: topicColors[i % topicColors.length], parent: topicNode, level: 2, tooltip: kw });
-    });
-  });
-  mindmapData = { nodes, ctx, W, H, canvas, drag: null, zoom: 1, panX: 0, panY: 0 };
-  drawMindmap();
-  setupMindmapEvents();
-}
-
-function drawMindmap() {
-  const { nodes, ctx, W, H, zoom, panX, panY } = mindmapData;
-  ctx.clearRect(0, 0, W, H);
-  nodes.forEach(n => {
-    if (n.parent) {
-      const px = n.parent.x * zoom + panX, py = n.parent.y * zoom + panY;
-      const nx = n.x * zoom + panX, ny = n.y * zoom + panY;
-      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(nx, ny);
-      ctx.strokeStyle = hexToRgba(n.color, 0.5); ctx.lineWidth = Math.max(1, (3-n.level)*zoom); ctx.stroke();
-    }
-  });
-  nodes.forEach(n => {
-    const x = n.x * zoom + panX, y = n.y * zoom + panY, r = n.r * zoom;
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 1.8);
-    grad.addColorStop(0, hexToRgba(n.color, 0.3));
-    grad.addColorStop(1, hexToRgba(n.color, 0));
-    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, r*1.8, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fillStyle = hexToRgba(n.color, 0.85); ctx.fill();
-    ctx.strokeStyle = n.color; ctx.lineWidth = 3*zoom; ctx.stroke();
-    if (mindmapShowLabels && r > 15) {
-      ctx.fillStyle = 'white';
-      ctx.font = `${Math.max(10, (13-n.level*2)*zoom)}px Inter`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(n.label.slice(0, 20), x, y);
-    }
-  });
-}
-
-function setupMindmapEvents() {
-  const { canvas } = mindmapData;
-  const tooltip = $('mindmapTooltip');
-  const getPos = (e) => { const r = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - r.left, y: cy - r.top }; };
-  const findNode = (x, y) => { const { nodes, zoom, panX, panY } = mindmapData; for (let i = nodes.length-1; i >= 0; i--) { const n = nodes[i]; const nx = n.x*zoom+panX, ny = n.y*zoom+panY, r = n.r*zoom; if ((x-nx)**2 + (y-ny)**2 <= r**2) return n; } return null; };
-  let isDragging = false, lastX = 0, lastY = 0;
-  canvas.addEventListener('mousedown', e => { const p = getPos(e); const n = findNode(p.x, p.y); mindmapData.drag = n || 'pan'; isDragging = true; lastX = p.x; lastY = p.y; });
-  canvas.addEventListener('mousemove', e => {
-    const p = getPos(e);
-    if (isDragging) {
-      const dx = p.x - lastX, dy = p.y - lastY;
-      if (mindmapData.drag === 'pan') { mindmapData.panX += dx; mindmapData.panY += dy; }
-      else if (mindmapData.drag) { mindmapData.drag.x += dx/mindmapData.zoom; mindmapData.drag.y += dy/mindmapData.zoom; }
-      lastX = p.x; lastY = p.y; drawMindmap();
-    } else {
-      const n = findNode(p.x, p.y);
-      if (n) { tooltip.innerHTML = `<div class="tooltip-title">${escapeHtml(n.label)}</div>`; tooltip.style.left = (p.x+15)+'px'; tooltip.style.top = (p.y+15)+'px'; tooltip.classList.add('show'); canvas.style.cursor = 'grab'; }
-      else { tooltip.classList.remove('show'); canvas.style.cursor = 'default'; }
-    }
-  });
-  canvas.addEventListener('mouseup', () => { isDragging = false; mindmapData.drag = null; });
-  canvas.addEventListener('mouseleave', () => { isDragging = false; mindmapData.drag = null; tooltip.classList.remove('show'); });
-  canvas.addEventListener('wheel', e => { e.preventDefault(); mindmapData.zoom = Math.max(0.3, Math.min(3, mindmapData.zoom * (e.deltaY > 0 ? 0.9 : 1.1))); drawMindmap(); }, { passive: false });
-}
-
-function resetMindmap() { if (currentText) { const w = currentText.replace(/\s+/g,' ').trim().split(/\s+/).filter(w=>w.length>0); const freq = {}; w.forEach(x => { const lw = x.toLowerCase().replace(/[^a-záàâãéèêíïóôõúüñç0-9]/g,''); if (lw.length>3) freq[lw] = (freq[lw]||0)+1; }); const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,15); const p = currentText.split(/\n\s*\n/).filter(p => p.trim().length > 10); renderMindmap(top, p); } }
-function toggleMindmapLabels() { mindmapShowLabels = !mindmapShowLabels; drawMindmap(); }
 
 // ====== TABS ======
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    $('tab-' + btn.dataset.tab).classList.remove('hidden');
-    if (btn.dataset.tab === 'mindmap' && mindmapData) {
-      setTimeout(() => {
-        const canvas = $('mindmapCanvas');
-        const container = canvas.parentElement;
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = container.clientWidth * dpr;
-        canvas.height = container.clientHeight * dpr;
-        canvas.style.width = container.clientWidth + 'px';
-        canvas.style.height = container.clientHeight + 'px';
-        mindmapData.ctx = canvas.getContext('2d');
-        mindmapData.ctx.scale(dpr, dpr);
-        mindmapData.W = container.clientWidth;
-        mindmapData.H = container.clientHeight;
-        drawMindmap();
-      }, 50);
-    }
-  });
-});
-
-function exportReport() {
-  const report = `RELATÓRIO PDF INSIGHT PRO
-==========================
-Documento: ${$('fileName').textContent}
-Data: ${new Date().toLocaleString('pt-BR')}
-Usuário: ${currentUser?.name || 'N/A'}
-Perfil: ${userProfile}
-
-ESTATÍSTICAS
-------------
-Páginas: ${$('statPages').textContent}
-Palavras: ${$('statWords').textContent}
-Parágrafos: ${$('statParagraphs').textContent}
-Tempo leitura: ${$('statTime').textContent}
-
-RESUMO (IA)
------------
-${Array.from($('summaryContent').children).map((el, i) => `${i+1}. ${el.textContent.trim()}`).join('\n')}
-
-IDEIA CENTRAL
--------------
-${$('mainIdea').textContent}
-`;
-  const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'relatorio_pdf_insight.txt'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('Relatório exportado! 📥', 'success');
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
 }
 
-window.addEventListener('resize', () => {
-  if (mindmapData && !$('tab-mindmap').classList.contains('hidden')) {
-    const canvas = $('mindmapCanvas');
-    const container = canvas.parentElement;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = container.clientWidth * dpr;
-    canvas.height = container.clientHeight * dpr;
-    canvas.style.width = container.clientWidth + 'px';
-    canvas.style.height = container.clientHeight + 'px';
-    mindmapData.ctx = canvas.getContext('2d');
-    mindmapData.ctx.scale(dpr, dpr);
-    mindmapData.W = container.clientWidth;
-    mindmapData.H = container.clientHeight;
-    drawMindmap();
-  }
-});
+// ====== EXPORT ======
+function exportReport() {
+  const report = `RELATÓRIO PDF INSIGHT\n======================\nDocumento: ${document.getElementById('fileName').textContent}\nData: ${new Date().toLocaleString('pt-BR')}\n\nEstatísticas:\n- Páginas: ${document.getElementById('statPages').textContent}\n- Palavras: ${document.getElementById('statWords').textContent}\n- Parágrafos: ${document.getElementById('statParagraphs').textContent}\n- Tempo leitura: ${document.getElementById('statTime').textContent}\n\nResumo:\n${document.getElementById('summaryContent').textContent}\n`;
+  const blob = new Blob([report], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'relatorio.txt';
+  a.click();
+  showToast('Exportado! 📥', 'success');
+}
 
-// ====== INIT ======
-initAuth();
-selectSummaryLevel('medium');
-updateTextCounter();
+console.log('✅ App pronto!');
 </script>
 </body>
 </html>
