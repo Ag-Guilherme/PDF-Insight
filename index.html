@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PDF Insight — Explique seu PDF com IA Visual</title>
-<script src=""></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
@@ -431,6 +431,19 @@ let charts = {};
 let mindmapData = null;
 let mindmapShowLabels = true;
 
+// ====== Helper: converte cor hex (#rrggbb) para rgba com alpha ======
+function hexToRgba(hex, alpha) {
+  // Remove qualquer alpha já existente (suporta #rgb, #rrggbb, #rrggbbaa)
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (h.length === 8) h = h.slice(0, 6); // descarta alpha pré-existente
+  if (h.length !== 6) return `rgba(124,92,255,${alpha})`; // fallback
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // ====== UI helpers ======
 const $ = id => document.getElementById(id);
 const dropZone = $('dropZone');
@@ -528,7 +541,6 @@ function analyzeText(text, numPages) {
   currentText = text;
   const cleanText = text.replace(/\s+/g, ' ').trim();
 
-  // Stats
   const words = cleanText.split(/\s+/).filter(w => w.length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 10);
   const sentences = cleanText.split(/[.!?]+/).filter(s => s.trim().length > 10);
@@ -541,8 +553,7 @@ function analyzeText(text, numPages) {
   $('statTime').textContent = readingTime + 'm';
   $('docTitle').textContent = `${wordCount.toLocaleString('pt-BR')} palavras • ${numPages} páginas • ~${readingTime} min de leitura`;
 
-  // Word frequency
-  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','nos','nas','ao','aos','as','os','é','são','foi','ser','estar','ter','haver','fazer','dizer','poder','ir','ver','dar','saber','querer','ficar','deve','devem','pode','podem','mais','menos','muito','muitos','muitas','pouco','poucos','também','não','sim','mas','ou','se','quando','como','onde','porque','isso','isto','esse','essa','esse','esta','este','deste','dessa','disso','neste','nesta','naquele','naquela','aquele','aquela','seu','sua','seus','suas','meu','minha','meus','minhas','nosso','nossa','se','lhe','lhes','me','te','nos','vos','o','os','a','as','um','uma','uns','umas','qual','quais','quem','cujo','cuja','cujos','cujas','quanto','quanta','quantos','quantas','tal','tais','todo','toda','todos','todas','outro','outra','outros','outras','mesmo','mesma','mesmos','mesmas','próprio','própria','próprios','próprias','cada','qualquer','quaisquer','algum','alguma','alguns','algumas','nenhum','nenhuma',' nenhuns','nenhumas','the','and','of','to','in','is','it','for','that','with','on','are','as','be','this','have','from','or','an','by','at','not','but','what','all','were','we','when','your','can','said','there','use','each','which','she','do','how','their','if','will','up','other','about','out','many','then','them','these','so','some','her','would','make','like','into','him','has','two','more','go','no','way','could','my','than','first','been','its','who','now','people','may','down','show','any','such','only','his','one','also','into','over','after','use','being','between','both','under','where','after','again','further','once','here','there','when','where','why','how','all','any','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','s','t','can','will','just','don','should','now']);
+  const stopWords = new Set(['de','da','do','das','dos','a','o','e','que','em','um','uma','para','com','por','no','na','nos','nas','ao','aos','as','os','é','são','foi','ser','estar','ter','haver','fazer','dizer','poder','ir','ver','dar','saber','querer','ficar','deve','devem','pode','podem','mais','menos','muito','muitos','muitas','pouco','poucos','também','não','sim','mas','ou','se','quando','como','onde','porque','isso','isto','esse','essa','esta','este','deste','dessa','disso','neste','nesta','naquele','naquela','aquele','aquela','seu','sua','seus','suas','meu','minha','meus','minhas','nosso','nossa','lhe','lhes','me','te','nos','vos','qual','quais','quem','cujo','cuja','cujos','cujas','quanto','quanta','quantos','quantas','tal','tais','todo','toda','todos','todas','outro','outra','outros','outras','mesmo','mesma','mesmos','mesmas','próprio','própria','próprios','próprias','cada','qualquer','quaisquer','algum','alguma','alguns','algumas','nenhum','nenhuma','the','and','of','to','in','is','it','for','that','with','on','are','as','be','this','have','from','or','an','by','at','not','but','what','all','were','we','when','your','can','said','there','use','each','which','she','do','how','their','if','will','up','other','about','out','many','then','them','these','so','some','her','would','make','like','into','him','has','two','more','go','no','way','could','my','than','first','been','its','who','now','people','may','down','show','any','such','only','his','one','also','into','over','after','being','between','both','under','where','again','further','once','here','why','few','most','nor','own','same','very','just','should']);
 
   const freq = {};
   words.forEach(w => {
@@ -554,29 +565,18 @@ function analyzeText(text, numPages) {
   const sortedWords = Object.entries(freq).sort((a,b) => b[1]-a[1]);
   const topWords = sortedWords.slice(0, 15);
 
-  // Paragraph analysis
   const paraStats = paragraphs.map((p, i) => ({
     idx: i+1,
     words: p.split(/\s+/).filter(w => w).length,
     sentences: p.split(/[.!?]+/).filter(s => s.trim().length > 5).length
   }));
 
-  // Topic detection (simple: group paragraphs by shared keywords)
   const topics = detectTopics(paragraphs, topWords.map(w=>w[0]));
-
-  // Summary extraction (score sentences by position, keyword density, length)
   const summary = extractSummary(sentences, topWords.map(w=>w[0]));
-
-  // Main idea
   const mainIdea = extractMainIdea(paragraphs, topWords.map(w=>w[0]));
-
-  // Concepts
   const concepts = extractConcepts(text, topWords.map(w=>w[0]));
-
-  // Structure
   const structure = detectStructure(text);
 
-  // Render everything
   renderSummary(summary, mainIdea);
   renderCharts(topWords, paraStats, topics);
   renderMindmap(topWords, topics);
@@ -590,7 +590,6 @@ function analyzeText(text, numPages) {
 
 function detectTopics(paragraphs, keywords) {
   const topics = [];
-  const kwSet = new Set(keywords.slice(0, 8));
   paragraphs.forEach((p, i) => {
     const lower = p.toLowerCase();
     const matches = keywords.filter(k => lower.includes(k));
@@ -606,7 +605,6 @@ function detectTopics(paragraphs, keywords) {
 }
 
 function extractSummary(sentences, keywords) {
-  const kwSet = new Set(keywords);
   const scored = sentences.map((s, i) => {
     const lower = s.toLowerCase();
     const kwCount = keywords.filter(k => lower.includes(k)).length;
@@ -696,7 +694,6 @@ function renderCharts(topWords, paraStats, topics) {
 
   const colors = ['#7c5cff','#22d3ee','#f472b6','#a78bfa','#34d399','#fbbf24','#f87171','#60a5fa','#c084fc','#2dd4bf','#fb7185','#a3e635','#facc15','#38bdf8','#e879f9'];
 
-  // Words chart
   charts.words = new Chart($('chartWords'), {
     type: 'bar',
     data: {
@@ -720,7 +717,6 @@ function renderCharts(topWords, paraStats, topics) {
     }
   });
 
-  // Paragraphs chart
   charts.paragraphs = new Chart($('chartParagraphs'), {
     type: 'line',
     data: {
@@ -755,7 +751,6 @@ function renderCharts(topWords, paraStats, topics) {
     }
   });
 
-  // Topics chart
   const topicLabels = topics.slice(0,6).map(t => t.name.slice(0, 20));
   const topicWeights = topics.slice(0,6).map(t => t.weight);
   charts.topics = new Chart($('chartTopics'), {
@@ -775,7 +770,6 @@ function renderCharts(topWords, paraStats, topics) {
     }
   });
 
-  // Complexity chart
   const avgWordsPerSentence = paraStats.length > 0 ? paraStats.reduce((a,p)=>a+p.words,0) / Math.max(1, paraStats.reduce((a,p)=>a+p.sentences,0)) : 15;
   const complexity = [
     { label: 'Simples', value: Math.max(0, 100 - avgWordsPerSentence * 3) },
@@ -825,7 +819,6 @@ function renderMindmap(topWords, topics) {
   const W = container.clientWidth;
   const H = container.clientHeight;
 
-  // Build nodes
   const nodes = [];
   const centerNode = {
     id: 'root', label: 'Documento', x: W/2, y: H/2, r: 50,
@@ -844,6 +837,7 @@ function renderMindmap(topWords, topics) {
       x: W/2 + Math.cos(angle) * dist,
       y: H/2 + Math.sin(angle) * dist,
       r: 35 + t.weight * 3,
+      // COR BASE (sem alpha) — o alpha é aplicado apenas no draw
       color: topicColors[i % topicColors.length],
       parent: centerNode,
       expanded: true,
@@ -851,7 +845,6 @@ function renderMindmap(topWords, topics) {
     };
     nodes.push(node);
 
-    // Sub-nodes (keywords)
     if (t.keywords.length > 0) {
       t.keywords.slice(0, 3).forEach((kw, j) => {
         const subAngle = angle + (j - 1) * 0.4;
@@ -862,7 +855,8 @@ function renderMindmap(topWords, topics) {
           x: W/2 + Math.cos(subAngle) * subDist,
           y: H/2 + Math.sin(subAngle) * subDist,
           r: 22,
-          color: topicColors[i % topicColors.length] + '99',
+          // COR BASE (sem alpha) — o alpha é aplicado apenas no draw
+          color: topicColors[i % topicColors.length],
           parent: node,
           expanded: false,
           tooltip: 'Palavra-chave'
@@ -881,7 +875,7 @@ function drawMindmap() {
   const { nodes, ctx, W, H, zoom, panX, panY } = mindmapData;
   ctx.clearRect(0, 0, W, H);
 
-  // Draw connections
+  // Conexões
   nodes.forEach(n => {
     if (n.parent) {
       const px = n.parent.x * zoom + panX;
@@ -891,13 +885,13 @@ function drawMindmap() {
       ctx.beginPath();
       ctx.moveTo(px, py);
       ctx.lineTo(nx, ny);
-      ctx.strokeStyle = n.color + '66';
+      ctx.strokeStyle = hexToRgba(n.color, 0.4);
       ctx.lineWidth = 2;
       ctx.stroke();
     }
   });
 
-  // Draw nodes
+  // Nós
   nodes.forEach(n => {
     const x = n.x * zoom + panX;
     const y = n.y * zoom + panY;
@@ -905,23 +899,23 @@ function drawMindmap() {
 
     // Glow
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 1.5);
-    grad.addColorStop(0, n.color + '44');
-    grad.addColorStop(1, 'transparent');
+    grad.addColorStop(0, hexToRgba(n.color, 0.27));
+    grad.addColorStop(1, hexToRgba(n.color, 0));
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(x, y, r * 1.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Circle
+    // Círculo
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = n.color + 'cc';
+    ctx.fillStyle = hexToRgba(n.color, 0.8);
     ctx.fill();
     ctx.strokeStyle = n.color;
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Label
+    // Rótulo
     if (mindmapShowLabels && r > 15) {
       ctx.fillStyle = 'white';
       ctx.font = `${Math.max(10, 12 * zoom)}px Inter, sans-serif`;
@@ -1022,7 +1016,6 @@ function setupMindmapEvents() {
     const node = findNode(pos.x, pos.y);
     if (node && node.parent) {
       node.expanded = !node.expanded;
-      // Toggle children
       mindmapData.nodes.forEach(n => {
         if (n.parent === node) {
           n.x = node.expanded ? node.x + (n.x - node.x) * 0.01 : node.x;
@@ -1039,7 +1032,6 @@ function setupMindmapEvents() {
     drawMindmap();
   }, { passive: false });
 
-  // Touch
   canvas.addEventListener('touchstart', e => {
     e.preventDefault();
     const pos = getPos(e);
