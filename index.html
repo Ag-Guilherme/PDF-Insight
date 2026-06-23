@@ -17,7 +17,6 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
 .gradient-text { background: linear-gradient(90deg, #7c5cff, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .btn-primary { background: linear-gradient(90deg, #7c5cff, #22d3ee); color: white; border: none; cursor: pointer; padding: 12px 24px; border-radius: 12px; font-weight: 600; transition: all .2s; font-size: 14px; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,92,255,0.4); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-ghost { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e6e8ef; cursor: pointer; padding: 12px 24px; border-radius: 12px; transition: all .2s; font-size: 14px; }
 .btn-ghost:hover { background: rgba(255,255,255,0.08); }
 .btn-big { padding: 16px 28px; font-size: 16px; border-radius: 16px; }
@@ -29,7 +28,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
 .input-field, .textarea-field { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #e6e8ef; font-family: inherit; font-size: 14px; outline: none; }
 .input-field:focus, .textarea-field:focus { border-color: #7c5cff; }
 .textarea-field { resize: vertical; min-height: 200px; line-height: 1.6; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: #121628; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 20px; z-index: 2000; display: none; align-items: center; gap: 10px; max-width: 360px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: #121628; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 20px; z-index: 2000; display: none; align-items: center; gap: 10px; max-width: 400px; }
 .toast.show { display: flex; }
 .toast.success { border-left: 3px solid #34d399; }
 .toast.error { border-left: 3px solid #f87171; }
@@ -75,8 +74,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
 .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 .status-dot.online { background: #34d399; box-shadow: 0 0 8px #34d399; }
 .status-dot.offline { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-.resource-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: all .3s; cursor: pointer; }
-.resource-card:hover { background: rgba(124,92,255,0.08); border-color: rgba(124,92,255,0.3); transform: translateY(-3px); }
+.debug-box { background: #000; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid #333; }
 </style>
 </head>
 <body>
@@ -97,7 +95,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
         </div>
       </div>
     </div>
-    <div class="hidden md:flex items-center gap-2" id="profileChips">
+    <div class="hidden md:flex items-center gap-2">
       <div class="profile-chip active" data-profile="estudante" onclick="setProfile('estudante')">🎓 Estudante</div>
       <div class="profile-chip" data-profile="pesquisador" onclick="setProfile('pesquisador')">🔬 Pesquisador</div>
       <div class="profile-chip" data-profile="executivo" onclick="setProfile('executivo')">💼 Executivo</div>
@@ -195,7 +193,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
 </div>
 
 <!-- HERO -->
-<section id="heroSection" class="max-w-7xl mx-auto px-6 pt-12 pb-8">
+<section class="max-w-7xl mx-auto px-6 pt-12 pb-8">
   <div class="grid md:grid-cols-2 gap-10 items-center">
     <div>
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs mb-5">
@@ -213,10 +211,13 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
         <button class="btn-ghost btn-big" onclick="openTextModal()">📝 Colar texto</button>
         <button class="btn-ghost btn-big" onclick="loadDemo()">▶️ Demo</button>
       </div>
-      <input type="file" id="fileInput" accept="application/pdf" class="hidden" onchange="handleFile(event)">
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" class="hidden">
+      <div class="mt-4 text-xs text-slate-500">
+        💡 <strong>Dica:</strong> Se o PDF não carregar, tente "Colar texto" ou use a Demo
+      </div>
     </div>
     <div class="glass rounded-3xl p-6">
-      <div id="dropZone" class="drop-zone p-10 text-center" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault(); this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+      <div id="dropZone" class="drop-zone p-10 text-center">
         <div class="text-6xl mb-4">📑</div>
         <div class="text-lg font-semibold mb-2">Arraste seu PDF aqui</div>
         <div class="text-sm text-slate-400">ou clique para selecionar</div>
@@ -231,6 +232,11 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
           </div>
           <button class="btn-ghost text-xs px-3 py-1" onclick="resetFile()">✕</button>
         </div>
+      </div>
+      <!-- DEBUG -->
+      <div class="mt-4">
+        <button class="text-xs text-slate-500 hover:text-slate-300" onclick="document.getElementById('debugBox').classList.toggle('hidden')">🔧 Mostrar debug</button>
+        <div id="debugBox" class="debug-box hidden"></div>
       </div>
     </div>
   </div>
@@ -277,7 +283,6 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
     </div>
   </div>
 
-  <!-- TABS - TODOS OS RECURSOS -->
   <div class="glass rounded-2xl p-2 mb-6 flex gap-2 overflow-x-auto">
     <button class="tab-btn active" onclick="switchTab('summary', this)">📝 Resumo</button>
     <button class="tab-btn" onclick="switchTab('mindmap', this)">🧠 Mapa Mental</button>
@@ -296,13 +301,12 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
       <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
           <div class="text-sm text-slate-400 uppercase tracking-wider">📝 Resumo Inteligente</div>
-          <div class="text-xs text-slate-500 mt-1">Gerado automaticamente do seu documento</div>
         </div>
         <button class="btn-ghost text-xs px-3 py-2" onclick="regenerateSummary()">🔄 Regenerar</button>
       </div>
       <div id="summaryLoading" class="hidden text-center py-12">
         <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA analisando seu documento...</div>
+        <div class="text-sm text-slate-400">IA analisando...</div>
       </div>
       <div id="summaryContent" class="space-y-3"></div>
       <div class="mt-6 pt-6 border-t border-white/5">
@@ -314,16 +318,13 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
     <!-- MAPA MENTAL -->
     <div id="tab-mindmap" class="hidden">
       <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <div>
-          <div class="text-sm text-slate-400 uppercase tracking-wider">🧠 Mapa Mental Interativo</div>
-          <div class="text-xs text-slate-500 mt-1">Visualize a estrutura do documento</div>
-        </div>
+        <div class="text-sm text-slate-400 uppercase tracking-wider">🧠 Mapa Mental Interativo</div>
         <div class="flex gap-2">
           <button class="btn-ghost text-xs px-3 py-2" onclick="resetMindmap()">↻ Resetar</button>
           <button class="btn-ghost text-xs px-3 py-2" onclick="toggleLabels()">🏷️ Rótulos</button>
         </div>
       </div>
-      <div class="text-xs text-slate-400 mb-3 bg-white/5 p-3 rounded-lg">💡 <strong>Dica:</strong> Arraste os nós para reorganizar • Scroll para zoom • Passe o mouse para ver detalhes</div>
+      <div class="text-xs text-slate-400 mb-3 bg-white/5 p-3 rounded-lg">💡 Arraste os nós • Scroll para zoom</div>
       <div class="relative rounded-2xl overflow-hidden" style="background: radial-gradient(circle, rgba(124,92,255,0.1), transparent 70%); height: 600px; border: 1px solid rgba(255,255,255,0.08);">
         <canvas id="mindmapCanvas" style="width:100%; height:100%; display:block;"></canvas>
         <div id="mindmapTooltip" class="tooltip"></div>
@@ -333,21 +334,17 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
     <!-- QUIZ -->
     <div id="tab-quiz" class="hidden">
       <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <div>
-          <div class="text-sm text-slate-400 uppercase tracking-wider">❓ Quiz Inteligente</div>
-          <div class="text-xs text-slate-500 mt-1">Teste seu conhecimento sobre o documento</div>
-        </div>
+        <div class="text-sm text-slate-400 uppercase tracking-wider">❓ Quiz Inteligente</div>
         <button class="btn-primary text-xs px-4 py-2" onclick="generateQuiz()">🎲 Gerar Quiz</button>
       </div>
       <div id="quizLoading" class="hidden text-center py-12">
         <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA criando perguntas personalizadas...</div>
+        <div class="text-sm text-slate-400">Criando perguntas...</div>
       </div>
       <div id="quizContainer">
         <div class="text-center py-12">
           <div class="text-6xl mb-4">🎯</div>
           <div class="text-lg font-semibold mb-2">Pronto para testar seus conhecimentos?</div>
-          <div class="text-sm text-slate-400 mb-6">Clique em "Gerar Quiz" para criar perguntas sobre o documento</div>
           <button class="btn-primary" onclick="generateQuiz()">🎲 Gerar Quiz Agora</button>
         </div>
       </div>
@@ -356,15 +353,11 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
     <!-- FLASHCARDS -->
     <div id="tab-flashcards" class="hidden">
       <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <div>
-          <div class="text-sm text-slate-400 uppercase tracking-wider">🎴 Flashcards de Estudo</div>
-          <div class="text-xs text-slate-500 mt-1">Aprenda com perguntas e respostas</div>
-        </div>
+        <div class="text-sm text-slate-400 uppercase tracking-wider">🎴 Flashcards de Estudo</div>
         <button class="btn-primary text-xs px-4 py-2" onclick="generateFlashcards()">✨ Gerar Flashcards</button>
       </div>
       <div id="flashcardsLoading" class="hidden text-center py-12">
         <div class="loader mx-auto mb-4"></div>
-        <div class="text-sm text-slate-400">IA criando flashcards...</div>
       </div>
       <div class="flashcard-container" onclick="flipFlashcard()">
         <div class="flashcard" id="flashcard">
@@ -390,26 +383,24 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
     <div id="tab-chat" class="hidden">
       <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">💬 Chat com o Documento</div>
       <div class="glass rounded-2xl p-4 h-96 overflow-y-auto mb-4" id="chatMessages">
-        <div class="chat-msg ai">🤖 Olá! Li seu documento. Pode me perguntar qualquer coisa sobre o conteúdo!</div>
+        <div class="chat-msg ai">🤖 Olá! Li seu documento. Pode me perguntar qualquer coisa!</div>
       </div>
       <div class="flex flex-wrap gap-2 mb-3">
         <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais os pontos principais?')">📌 Pontos principais</button>
         <button class="btn-ghost text-xs" onclick="sendSuggestion('Explique como para uma criança')">🤔 Explicar simples</button>
         <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais as conclusões?')">💡 Conclusões</button>
         <button class="btn-ghost text-xs" onclick="sendSuggestion('Crie um plano de estudo')">📚 Plano de estudo</button>
-        <button class="btn-ghost text-xs" onclick="sendSuggestion('Quais os prós e contras?')">⚖️ Prós e contras</button>
       </div>
       <div class="flex gap-2">
-        <input type="text" id="chatInput" class="input-field flex-1" placeholder="Pergunte algo sobre o documento..." onkeypress="if(event.key==='Enter')sendChat()">
+        <input type="text" id="chatInput" class="input-field flex-1" placeholder="Pergunte algo..." onkeypress="if(event.key==='Enter')sendChat()">
         <button class="btn-primary" onclick="sendChat()">Enviar</button>
       </div>
     </div>
 
     <!-- MODOS -->
     <div id="tab-modes" class="hidden">
-      <div class="text-sm text-slate-400 uppercase tracking-wider mb-2">🎭 Reescrever em Diferentes Estilos</div>
-      <p class="text-sm text-slate-400 mb-4">A IA reescreve o conteúdo no estilo escolhido</p>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="modeGrid">
+      <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">🎭 Reescrever em Diferentes Estilos</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div class="mode-card" onclick="selectMode('crianca')"><div class="text-3xl mb-2">👶</div><div class="text-sm font-semibold">Criança</div></div>
         <div class="mode-card" onclick="selectMode('teen')"><div class="text-3xl mb-2">🧑‍🎓</div><div class="text-sm font-semibold">Adolescente</div></div>
         <div class="mode-card" onclick="selectMode('einstein')"><div class="text-3xl mb-2">🧠</div><div class="text-sm font-semibold">Einstein</div></div>
@@ -435,7 +426,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
       <div class="text-sm text-slate-400 uppercase tracking-wider mb-4">📊 Visualizações</div>
       <div class="grid md:grid-cols-2 gap-6">
         <div class="glass rounded-2xl p-5">
-          <div class="text-sm font-medium mb-3">Top 10 palavras mais frequentes</div>
+          <div class="text-sm font-medium mb-3">Top 10 palavras</div>
           <canvas id="chartWords" height="260"></canvas>
         </div>
         <div class="glass rounded-2xl p-5">
@@ -454,61 +445,22 @@ body { font-family: 'Inter', system-ui, sans-serif; background: #0b0d17; color: 
   </div>
 </section>
 
-<!-- FEATURES SECTION -->
-<section class="max-w-7xl mx-auto px-6 py-16">
-  <div class="text-center mb-10">
-    <h2 class="text-3xl font-bold mb-3">🎯 Todos os Recursos</h2>
-    <p class="text-slate-400">Tudo que você precisa para entender qualquer documento</p>
-  </div>
-  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div class="resource-card" onclick="document.getElementById('fileInput').click()">
-      <div class="text-4xl mb-3">📄</div>
-      <div class="font-semibold mb-1">Upload PDF</div>
-      <div class="text-sm text-slate-400">Arraste ou selecione seu PDF</div>
-    </div>
-    <div class="resource-card" onclick="openTextModal()">
-      <div class="text-4xl mb-3">📝</div>
-      <div class="font-semibold mb-1">Colar Texto</div>
-      <div class="text-sm text-slate-400">Cole qualquer texto para analisar</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">🧠</div>
-      <div class="font-semibold mb-1">Mapa Mental</div>
-      <div class="text-sm text-slate-400">Visualize a estrutura do documento</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">❓</div>
-      <div class="font-semibold mb-1">Quiz IA</div>
-      <div class="text-sm text-slate-400">Teste seu conhecimento</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">🎴</div>
-      <div class="font-semibold mb-1">Flashcards</div>
-      <div class="text-sm text-slate-400">Aprenda com perguntas/respostas</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">💬</div>
-      <div class="font-semibold mb-1">Chat IA</div>
-      <div class="text-sm text-slate-400">Converse sobre o documento</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">🎭</div>
-      <div class="font-semibold mb-1">8 Modos</div>
-      <div class="text-sm text-slate-400">Einstein, pirata, meme e mais</div>
-    </div>
-    <div class="resource-card">
-      <div class="text-4xl mb-3">📊</div>
-      <div class="font-semibold mb-1">Gráficos</div>
-      <div class="text-sm text-slate-400">Visualizações estatísticas</div>
-    </div>
-  </div>
-</section>
-
 <footer class="border-t border-white/5 py-8 text-center text-sm text-slate-500">
-  <div>PDF Insight Pro © 2026 • IA gratuita via Puter.js • Feito com 💜</div>
+  <div>PDF Insight Pro © 2026 • IA gratuita via Puter.js</div>
 </footer>
 
 <script>
+// ====== DEBUG ======
+function debug(msg) {
+  console.log('[DEBUG]', msg);
+  const box = document.getElementById('debugBox');
+  if (box) {
+    const time = new Date().toLocaleTimeString();
+    box.innerHTML += `[${time}] ${msg}\n`;
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
 // ====== STATE ======
 let currentUser = null;
 let userProfile = 'estudante';
@@ -525,21 +477,35 @@ let quizScore = 0;
 let quizAnswered = 0;
 
 // ====== INIT ======
-console.log('🚀 Iniciando PDF Insight Pro...');
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+debug('🚀 Iniciando app...');
+debug('PDF.js versão: ' + (pdfjsLib?.version || 'não carregado'));
+
+// Configurar worker do PDF.js - MÚLTIPLAS TENTATIVAS
+function setupPdfWorker() {
+  try {
+    // Tentativa 1: CDN direto
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    debug('✓ Worker configurado (CDN)');
+  } catch(e) {
+    debug('⚠ Erro ao configurar worker: ' + e.message);
+  }
+}
+setupPdfWorker();
 
 // Check AI
 async function checkAI() {
   const status = document.getElementById('aiStatus');
   const dot = document.getElementById('statusDot');
+  debug('Verificando IA...');
   try {
     if (typeof puter !== 'undefined' && puter.ai) {
+      debug('Puter.js disponível, testando IA...');
       await puter.ai.chat([{role:'user',content:'oi'}], {model:'gpt-4o-mini'});
       aiAvailable = true;
       status.textContent = 'IA Online (GPT-4o-mini)';
       status.style.color = '#34d399';
       dot.className = 'status-dot online';
-      console.log('✓ IA disponível');
+      debug('✓ IA disponível');
     } else {
       throw new Error('Puter não carregou');
     }
@@ -548,7 +514,7 @@ async function checkAI() {
     status.textContent = 'Modo Local (IA offline)';
     status.style.color = '#fbbf24';
     dot.className = 'status-dot offline';
-    console.warn('⚠ IA offline:', err.message);
+    debug('⚠ IA offline: ' + err.message);
   }
 }
 checkAI();
@@ -562,19 +528,23 @@ function loadSavedUser() {
       userProfile = currentUser.profile || 'estudante';
       updateAuthUI();
       updateProfileUI();
-    } catch(e) {}
+      debug('✓ Usuário carregado: ' + currentUser.name);
+    } catch(e) { debug('Erro ao carregar user: ' + e.message); }
   }
   renderSavedAccounts();
 }
 loadSavedUser();
 
 // ====== TOAST ======
+let toastTimer;
 function showToast(msg, type='info') {
   const toast = document.getElementById('toast');
   document.getElementById('toastIcon').textContent = {success:'✓',error:'✕',info:'ℹ',warn:'⚠'}[type]||'ℹ';
   document.getElementById('toastMsg').textContent = msg;
   toast.className = `toast show ${type}`;
-  setTimeout(() => toast.classList.remove('show'), 3500);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+  debug('Toast [' + type + ']: ' + msg);
 }
 
 // ====== AUTH ======
@@ -735,6 +705,7 @@ function processText() {
   const title = document.getElementById('textTitle').value.trim() || 'Texto colado';
   if (text.length < 100) { showToast('Texto muito curto (mín. 100)', 'error'); return; }
   closeTextModal();
+  debug('Processando texto colado: ' + title);
   document.getElementById('fileName').textContent = title;
   document.getElementById('fileSize').textContent = `${text.split(/\s+/).length} palavras`;
   document.getElementById('fileInfo').classList.remove('hidden');
@@ -743,27 +714,82 @@ function processText() {
   analyzeText(text, pages);
 }
 
-// ====== FILE HANDLING ======
-function handleFile(e) {
+// ====== FILE HANDLING - CORRIGIDO ======
+debug('Configurando handlers de arquivo...');
+
+// Handler principal do input file
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  debug('📎 Evento change disparado');
+  debug('Arquivos selecionados: ' + e.target.files.length);
+  
   const file = e.target.files[0];
-  if (!file) return;
-  if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
-  if (file.size > 20 * 1024 * 1024) { showToast('Arquivo muito grande (máx 20MB)', 'error'); return; }
+  if (!file) {
+    debug('⚠ Nenhum arquivo selecionado');
+    return;
+  }
+  
+  debug('📄 Arquivo: ' + file.name);
+  debug('📏 Tamanho: ' + file.size + ' bytes');
+  debug('📋 Tipo: ' + file.type);
+  
+  if (!currentUser) {
+    showToast('Faça login primeiro', 'info');
+    openLogin();
+    e.target.value = '';
+    return;
+  }
+  
+  if (file.size > 20 * 1024 * 1024) {
+    showToast('Arquivo muito grande (máx 20MB)', 'error');
+    e.target.value = '';
+    return;
+  }
+  
+  // Verificar se é PDF
+  const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (!isPDF) {
+    showToast('Por favor, selecione um arquivo PDF', 'error');
+    e.target.value = '';
+    return;
+  }
+  
   document.getElementById('fileName').textContent = file.name;
   document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
   document.getElementById('fileInfo').classList.remove('hidden');
   document.getElementById('dropZone').classList.add('hidden');
+  
   processPDF(file);
-}
-function handleDrop(e) {
+});
+
+// Drop zone
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('click', () => {
+  debug('Drop zone clicada');
+  document.getElementById('fileInput').click();
+});
+dropZone.addEventListener('dragover', e => {
   e.preventDefault();
-  document.getElementById('dropZone').classList.remove('drag');
+  dropZone.classList.add('drag');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag');
+});
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  debug('📥 Arquivo dropado');
   const file = e.dataTransfer.files[0];
-  if (file && file.type === 'application/pdf') {
-    document.getElementById('fileInput').files = e.dataTransfer.files;
-    handleFile({target: {files: [file]}});
+  if (file) {
+    debug('Arquivo dropado: ' + file.name);
+    // Criar um DataTransfer para simular input
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('fileInput').files = dt.files;
+    // Disparar evento change
+    document.getElementById('fileInput').dispatchEvent(new Event('change'));
   }
-}
+});
+
 function resetFile() {
   currentText = '';
   document.getElementById('fileInfo').classList.add('hidden');
@@ -775,8 +801,10 @@ function resetFile() {
   document.getElementById('textTitle').value = '';
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
+
 function loadDemo() {
   if (!currentUser) { showToast('Faça login primeiro', 'info'); openLogin(); return; }
+  debug('Carregando demo...');
   const demoText = `Inteligência Artificial e Aprendizado de Máquina
 
 A inteligência artificial (IA) é um campo da ciência da computação dedicado à criação de sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana. Essas tarefas incluem reconhecimento de voz, tomada de decisões e tradução de idiomas.
@@ -798,32 +826,90 @@ O futuro promete avanços em linguagem natural, visão computacional e robótica
   document.getElementById('dropZone').classList.add('hidden');
   analyzeText(demoText, 8);
 }
+
+// ====== PROCESS PDF - CORRIGIDO COM MELHOR TRATAMENTO DE ERROS ======
 async function processPDF(file) {
+  debug('🚀 Iniciando processPDF...');
   document.getElementById('processing').classList.remove('hidden');
   document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('processingStatus').textContent = 'Lendo arquivo...';
+  document.getElementById('processingStatus').textContent = 'Preparando...';
+  
   try {
-    const ab = await file.arrayBuffer();
-    document.getElementById('processingStatus').textContent = 'Carregando PDF...';
-    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-    document.getElementById('processingStatus').textContent = `Extraindo ${pdf.numPages} páginas...`;
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      fullText += content.items.map(item => item.str).join(' ') + '\n\n';
-      document.getElementById('processingStatus').textContent = `Página ${i}/${pdf.numPages}`;
+    // Passo 1: Ler arquivo
+    debug('Passo 1: Lendo arquivo como ArrayBuffer...');
+    document.getElementById('processingStatus').textContent = 'Lendo arquivo...';
+    
+    let arrayBuffer;
+    try {
+      arrayBuffer = await file.arrayBuffer();
+      debug('✓ Arquivo lido: ' + arrayBuffer.byteLength + ' bytes');
+    } catch(e) {
+      throw new Error('Falha ao ler arquivo: ' + e.message);
     }
+    
+    // Passo 2: Carregar PDF
+    debug('Passo 2: Carregando PDF...');
+    document.getElementById('processingStatus').textContent = 'Carregando PDF...';
+    
+    let pdf;
+    try {
+      pdf = await pdfjsLib.getDocument({
+        data: new Uint8Array(arrayBuffer),
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+        cMapPacked: true
+      }).promise;
+      debug('✓ PDF carregado: ' + pdf.numPages + ' páginas');
+    } catch(e) {
+      debug('❌ Erro ao carregar PDF: ' + e.message);
+      throw new Error('Não foi possível ler este PDF. O arquivo pode estar protegido, corrompido ou ser uma imagem escaneada. Tente usar "Colar texto" como alternativa. (' + e.message + ')');
+    }
+    
+    // Passo 3: Extrair texto
+    debug('Passo 3: Extraindo texto de ' + pdf.numPages + ' páginas...');
+    document.getElementById('processingStatus').textContent = `Extraindo texto (0/${pdf.numPages})...`;
+    
+    let fullText = '';
+    let pagesWithText = 0;
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      try {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        fullText += pageText + '\n\n';
+        if (pageText.trim().length > 10) pagesWithText++;
+        document.getElementById('processingStatus').textContent = `Extraindo (${i}/${pdf.numPages})...`;
+      } catch(e) {
+        debug('⚠ Erro na página ' + i + ': ' + e.message);
+      }
+    }
+    
+    debug('✓ Texto extraído: ' + fullText.length + ' caracteres');
+    debug('Páginas com texto: ' + pagesWithText + '/' + pdf.numPages);
+    
+    // Verificar se tem texto
+    const cleanText = fullText.trim();
+    if (cleanText.length < 50) {
+      throw new Error('O PDF não contém texto extraível. Pode ser um PDF escaneado (imagem). Tente usar "Colar texto" para colar o conteúdo manualmente.');
+    }
+    
+    // Passo 4: Analisar
+    debug('Passo 4: Analisando texto...');
+    document.getElementById('processingStatus').textContent = 'Analisando com IA...';
     analyzeText(fullText, pdf.numPages);
+    
   } catch (err) {
+    debug('❌ ERRO: ' + err.message);
     console.error(err);
     showToast('Erro: ' + err.message, 'error');
+    document.getElementById('processing').classList.add('hidden');
     resetFile();
   }
 }
 
 // ====== ANALYSIS ======
 async function analyzeText(text, numPages) {
+  debug('Analisando texto: ' + text.length + ' caracteres, ' + numPages + ' páginas');
   currentText = text;
   const words = text.split(/\s+/).filter(w => w.length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 10);
@@ -865,7 +951,6 @@ async function analyzeText(text, numPages) {
     <div class="text-center py-12">
       <div class="text-6xl mb-4">🎯</div>
       <div class="text-lg font-semibold mb-2">Pronto para testar seus conhecimentos?</div>
-      <div class="text-sm text-slate-400 mb-6">Clique em "Gerar Quiz" para criar perguntas sobre o documento</div>
       <button class="btn-primary" onclick="generateQuiz()">🎲 Gerar Quiz Agora</button>
     </div>
   `;
@@ -917,7 +1002,7 @@ async function generateSummary(text) {
     }
     throw new Error('Formato inválido');
   } catch(err) {
-    console.error('Erro IA:', err);
+    debug('Erro IA resumo: ' + err.message);
     fallbackSummary(text, count);
     showToast('Usando resumo local (IA offline)', 'warn');
   }
@@ -976,18 +1061,14 @@ async function generateFlashcards() {
   document.getElementById('flashcardsLoading').classList.remove('hidden');
   
   if (!aiAvailable) {
-    // Fallback local
     const sentences = currentText.split(/[.!?]+/).filter(s => s.trim().length > 30);
     flashcards = sentences.slice(0, 8).map(s => {
       const parts = s.split(',');
-      return {
-        question: parts[0].trim() + '...?',
-        answer: s.trim()
-      };
+      return { question: parts[0].trim() + '...?', answer: s.trim() };
     });
     currentFlashcard = 0;
     updateFlashcard();
-    showToast(`${flashcards.length} flashcards criados! 🎴`, 'success');
+    showToast(`${flashcards.length} flashcards! 🎴`, 'success');
     document.getElementById('flashcardsLoading').classList.add('hidden');
     return;
   }
@@ -1004,7 +1085,7 @@ async function generateFlashcards() {
       showToast(`${flashcards.length} flashcards! 🎴`, 'success');
     } else throw new Error('Formato inválido');
   } catch(err) {
-    console.error(err);
+    debug('Erro flashcards: ' + err.message);
     showToast('Erro ao gerar flashcards', 'error');
   }
   document.getElementById('flashcardsLoading').classList.add('hidden');
@@ -1036,7 +1117,6 @@ async function generateQuiz() {
   document.getElementById('quizContainer').innerHTML = '';
   
   if (!aiAvailable) {
-    // Fallback local - gera quiz simples
     generateLocalQuiz();
     document.getElementById('quizLoading').classList.add('hidden');
     return;
@@ -1055,7 +1135,7 @@ async function generateQuiz() {
       showToast(`${quizQuestions.length} perguntas! ❓`, 'success');
     } else throw new Error('Formato inválido');
   } catch(err) {
-    console.error(err);
+    debug('Erro quiz: ' + err.message);
     generateLocalQuiz();
     showToast('Usando quiz local (IA offline)', 'warn');
   }
@@ -1063,46 +1143,34 @@ async function generateQuiz() {
 }
 
 function generateLocalQuiz() {
-  // Gera quiz baseado em palavras-chave do texto
   const sentences = currentText.split(/[.!?]+/).filter(s => s.trim().length > 30);
-  const words = currentText.split(/\s+/).filter(w => w.length > 5);
-  const uniqueWords = [...new Set(words.map(w => w.toLowerCase()))].slice(0, 20);
-  
   quizQuestions = [];
   for (let i = 0; i < Math.min(5, sentences.length); i++) {
     const sentence = sentences[i].trim();
-    const wordsInSentence = sentence.split(/\s+/).filter(w => w.length > 4);
-    if (wordsInSentence.length < 3) continue;
-    
-    const correctWord = wordsInSentence[Math.floor(Math.random() * wordsInSentence.length)];
-    const wrongWords = uniqueWords.filter(w => !sentence.toLowerCase().includes(w)).slice(0, 3);
-    
-    if (wrongWords.length < 3) continue;
-    
+    const words = sentence.split(/\s+/).filter(w => w.length > 5);
+    if (words.length < 3) continue;
+    const correctWord = words[Math.floor(Math.random() * words.length)];
+    const wrongWords = ['alternativa', 'diferente', 'oposição', 'contrário'].slice(0, 3);
     const options = [correctWord, ...wrongWords].sort(() => Math.random() - 0.5);
-    const correctIdx = options.indexOf(correctWord);
-    
     quizQuestions.push({
-      question: `Complete a frase: "${sentence.replace(correctWord, '______')}"`,
+      question: `Complete: "${sentence.replace(correctWord, '______')}"`,
       options: options,
-      correct: correctIdx,
-      explanation: `A palavra correta é "${correctWord}" no contexto: "${sentence}"`
+      correct: options.indexOf(correctWord),
+      explanation: `A palavra correta é "${correctWord}".`
     });
   }
-  
   if (quizQuestions.length === 0) {
     quizQuestions = [{
-      question: 'Quantas palavras tem aproximadamente o documento?',
-      options: ['Menos de 100', 'Entre 100 e 500', 'Mais de 500', 'Mais de 1000'],
-      correct: currentText.split(/\s+/).length > 500 ? 2 : 1,
-      explanation: `O documento tem ${currentText.split(/\s+/).length} palavras.`
+      question: 'Sobre o que trata o documento?',
+      options: ['Tecnologia', 'Esportes', 'Culinária', 'Baseado no texto'],
+      correct: 3,
+      explanation: 'O documento contém texto específico que você acabou de analisar.'
     }];
   }
-  
   quizScore = 0;
   quizAnswered = 0;
   renderQuiz();
-  showToast(`${quizQuestions.length} perguntas geradas! ❓`, 'success');
+  showToast(`${quizQuestions.length} perguntas! ❓`, 'success');
 }
 
 function renderQuiz() {
@@ -1137,7 +1205,7 @@ function answerQuiz(qi, oi) {
   quizAnswered++;
   if (quizAnswered === quizQuestions.length) {
     const pct = Math.round((quizScore / quizQuestions.length) * 100);
-    const msg = pct >= 80 ? '🏆 Excelente!' : pct >= 60 ? '👍 Bom trabalho!' : '📚 Continue estudando!';
+    const msg = pct >= 80 ? '🏆 Excelente!' : pct >= 60 ? '👍 Bom!' : '📚 Estude mais!';
     setTimeout(() => {
       const score = document.createElement('div');
       score.className = 'glass rounded-2xl p-8 text-center mt-6';
@@ -1155,13 +1223,13 @@ function answerQuiz(qi, oi) {
 
 // ====== MODOS ======
 const modePrompts = {
-  crianca: { name: '👶 Criança de 5 anos', instruction: 'Explique como para uma criança de 5 anos. Use palavras simples e analogias com brinquedos.' },
-  teen: { name: '🧑‍🎓 Adolescente', instruction: 'Explique como para um adolescente. Use linguagem descolada e referências a redes sociais.' },
-  einstein: { name: '🧠 Einstein', instruction: 'Explique como Einstein faria. Use analogias brilhantes e insights profundos.' },
-  pirate: { name: '🏴‍☠️ Pirata', instruction: 'Explique como um pirata. Use "arr", "marujo", "tesouro" e expressões piratas.' },
+  crianca: { name: '👶 Criança', instruction: 'Explique como para uma criança de 5 anos. Use palavras simples.' },
+  teen: { name: '🧑‍🎓 Adolescente', instruction: 'Explique como para um adolescente. Linguagem descolada.' },
+  einstein: { name: '🧠 Einstein', instruction: 'Explique como Einstein faria. Analogias brilhantes.' },
+  pirate: { name: '🏴‍☠️ Pirata', instruction: 'Explique como um pirata. Use "arr", "marujo", "tesouro".' },
   meme: { name: '😂 Meme', instruction: 'Explique em formato de memes. Use emojis e humor.' },
   formal: { name: '🎩 Formal', instruction: 'Reescreva em linguagem acadêmica formal.' },
-  twitter: { name: '🐦 Twitter', instruction: 'Transforme em thread do Twitter com emojis e frases curtas numeradas (1/, 2/).' },
+  twitter: { name: '🐦 Twitter', instruction: 'Transforme em thread do Twitter com emojis (1/, 2/).' },
   poema: { name: '📜 Poema', instruction: 'Transforme em um poema com rimas.' }
 };
 async function selectMode(mode) {
@@ -1174,8 +1242,7 @@ async function selectMode(mode) {
   document.getElementById('modeOutputContent').innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
   
   if (!aiAvailable) {
-    // Fallback local
-    document.getElementById('modeOutputContent').textContent = `⚠ IA offline. Modo "${modePrompts[mode].name}" requer conexão com internet para funcionar.`;
+    document.getElementById('modeOutputContent').textContent = `⚠ IA offline. Modo "${modePrompts[mode].name}" requer internet.`;
     return;
   }
   
@@ -1215,7 +1282,7 @@ function renderCharts(topWords, paraStats) {
       },
       options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9aa0b4' } }, x: { grid: { display: false }, ticks: { color: '#9aa0b4' } } } }
     });
-  } catch(e) { console.error('Erro gráficos:', e); }
+  } catch(e) { debug('Erro gráficos: ' + e.message); }
 }
 function renderKeywords(topWords) {
   const cloud = document.getElementById('keywordCloud');
@@ -1390,7 +1457,7 @@ ${document.getElementById('mainIdea').textContent}
   showToast('Exportado! 📥', 'success');
 }
 
-console.log('✅ App pronto!');
+debug('✅ App pronto!');
 </script>
 </body>
 </html>
